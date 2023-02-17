@@ -1,0 +1,24 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/DGAC_DSNA.svg</file>
+        <file>icons/dark/menu.svg</file>
+        <file>icons/light/menu.svg</file>
+        <file>icons/light/moon.svg</file>
+        <file>icons/dark/moon.svg</file>
+        <file>icons/dark/sun.svg</file>
+        <file>icons/light/sun.svg</file>
+        <file>icons/dark/home.svg</file>
+        <file>icons/light/home.svg</file>
+        <file>icons/dark/activity.svg</file>
+        <file>icons/light/activity.svg</file>
+        <file>icons/dark/database.svg</file>
+        <file>icons/dark/settings.svg</file>
+        <file>icons/dark/trending-down.svg</file>
+        <file>icons/light/database.svg</file>
+        <file>icons/light/settings.svg</file>
+        <file>icons/light/trending-down.svg</file>
+        <file>icons/dark/info.svg</file>
+        <file>icons/light/info.svg</file>
+        <file>icons/alert-triangle.svg</file>
+    </qresource>
+</RCC>
