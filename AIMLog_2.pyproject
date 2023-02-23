@@ -1,3 +1,3 @@
 {
-    "files": ["qml/main.qml","QML/pages/connexion.qml","QML/pages/home.qml","main.py","rc_icons.qy","QML/pages/database.qml","QML/pages/evenement.qml","icons.qrc","QML/pages/preference.qml","QML/myWidgets/LeftMenuButton.qml","QML/myWidgets/ToggleButton.qml","QML/pages/information.qml"]
+    "files": ["icons.qrc","QML/scripts/script.js","QML/myWidgets/LeftMenuButton.qml","QML/myWidgets/ToggleButton.qml","qml/main.qml","QML/pages/preference.qml","main.py","QML/pages/evenement.qml","QML/myWidgets/ChoixDomaine.qml","rc_icons.qy","QML/myWidgets/RetentionCalcul.qml","QML/pages/home.qml","QML/pages/information.qml","QML/myWidgets/ChoixCouleur.qml","QML/pages/connexion.qml","QML/myWidgets/MySpinBox.qml"]
 }

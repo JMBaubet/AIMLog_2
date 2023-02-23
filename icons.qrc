@@ -11,14 +11,16 @@
         <file>icons/light/home.svg</file>
         <file>icons/dark/activity.svg</file>
         <file>icons/light/activity.svg</file>
-        <file>icons/dark/database.svg</file>
         <file>icons/dark/settings.svg</file>
         <file>icons/dark/trending-down.svg</file>
-        <file>icons/light/database.svg</file>
         <file>icons/light/settings.svg</file>
         <file>icons/light/trending-down.svg</file>
         <file>icons/dark/info.svg</file>
         <file>icons/light/info.svg</file>
         <file>icons/alert-triangle.svg</file>
+        <file>icons/light/chevron-up.svg</file>
+        <file>icons/light/chevron-down.svg</file>
+        <file>icons/dark/chevron-up.svg</file>
+        <file>icons/dark/chevron-down.svg</file>
     </qresource>
 </RCC>

@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Window
 import QtQuick.Controls
 import QtQuick.Controls.Material
+import QtCore
 //import QtQuick.Layouts
 
 import "myWidgets"
@@ -61,7 +62,7 @@ ApplicationWindow {
                 width: 470
                 anchors.verticalCenter: parent.verticalCenter
                 horizontalAlignment: Text.AlignLeft
-                text: qsTr("Base de travail : <b>À configurer</b>")
+                text: qsTr("Domaine de travail : <b>À configurer</b>")
                 font.pointSize: 16
             }
         }
@@ -88,7 +89,9 @@ ApplicationWindow {
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: imageMoon.left
             anchors.rightMargin: 10
-            onToggled: mode = checked // mode et checked ont les valeurs 0 ou 1
+            checked: mode ? true : false
+//            onToggled: mode = checked // mode et checked ont les valeurs 0 ou 1
+            onToggled: backend.selectionMode(checked)
         }
 
         Image {
@@ -118,6 +121,7 @@ ApplicationWindow {
         anchors.top: topBar.bottom
         anchors.bottom: bottomBar.top
         color: Material.color(couleur, Material.ShadeA500)
+        clip: true // si pas positionné la souris est active sur 240 pixels de large
 
         PropertyAnimation{
             id: animationMenu
@@ -148,8 +152,6 @@ ApplicationWindow {
                 pageConnexion.visible = false
                 menuImportEvt.isActive = false
                 pageEvenement.visible = false
-                menuDatabase.isActive = false
-                pageDatabase.visible = false
                 menuSettings.isActive = false
                 pagePreference.visible = false
                 menuInformation.isActive = false
@@ -173,8 +175,6 @@ ApplicationWindow {
                 pageConnexion.visible = true
                 menuImportEvt.isActive = false
                 pageEvenement.visible = false
-                menuDatabase.isActive = false
-                pageDatabase.visible = false
                 menuSettings.isActive = false
                 pagePreference.visible = false
                 menuInformation.isActive = false
@@ -198,8 +198,6 @@ ApplicationWindow {
                 pageConnexion.visible = false
                 menuImportEvt.isActive = true
                 pageEvenement.visible = true
-                menuDatabase.isActive = false
-                pageDatabase.visible = false
                 menuSettings.isActive = false
                 pagePreference.visible = false
                 menuInformation.isActive = false
@@ -207,30 +205,6 @@ ApplicationWindow {
             }
         }
 
-        LeftMenuButton {
-            id: menuDatabase
-            windowMode: mode
-            materialColor: couleur
-
-            anchors.left: parent.left
-            anchors.top: menuImportEvt.bottom
-            btnIconSource: "database.svg"
-            btnText: "gestion\ndes bases de données"
-            onClicked: {
-                menuHome.isActive = false
-                pageHome.visible = false
-                menuImportCnx.isActive = false
-                pageConnexion.visible = false
-                menuImportEvt.isActive = false
-                pageEvenement.visible = false
-                menuDatabase.isActive = true
-                pageDatabase.visible = true
-                menuSettings.isActive = false
-                pagePreference.visible = false
-                menuInformation.isActive = false
-                pageInformation.visible = false
-            }
-        }
 
         LeftMenuButton {
             id: menuSettings
@@ -248,8 +222,6 @@ ApplicationWindow {
                 pageConnexion.visible = false
                 menuImportEvt.isActive = false
                 pageEvenement.visible = false
-                menuDatabase.isActive = false
-                pageDatabase.visible = false
                 menuSettings.isActive = true
                 pagePreference.visible = true
                 menuInformation.isActive = false
@@ -273,8 +245,6 @@ ApplicationWindow {
                 pageConnexion.visible = false
                 menuImportEvt.isActive = false
                 pageEvenement.visible = false
-                menuDatabase.isActive = false
-                pageDatabase.visible = false
                 menuSettings.isActive = false
                 pagePreference.visible = false
                 menuInformation.isActive = true
@@ -315,7 +285,7 @@ ApplicationWindow {
             visible: false
             clip: true
         }
-
+/*
         Loader {
             id: pageDatabase
             anchors.fill: parent
@@ -323,7 +293,7 @@ ApplicationWindow {
             visible: false
             clip: true
         }
-
+*/
         Loader {
             id: pagePreference
             anchors.fill: parent
@@ -340,7 +310,6 @@ ApplicationWindow {
             clip: true
         }
 
-
     }
 
     Rectangle {
@@ -350,6 +319,29 @@ ApplicationWindow {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
+
+        Label {
+            id: message
+            anchors.left: parent.left
+            anchors.leftMargin: 20
+            anchors.verticalCenter: parent.verticalCenter
+            width: 300
+            opacity: 1
+            text: qsTr("")
+            font.bold: true
+
+            PropertyAnimation{
+                id: messageAnnimation
+                target: message
+                property: "opacity"
+                to: if (message.text !== "") return 0
+                duration: 2500
+                easing.type: Easing.InElastic
+                easing.period: 3
+            }
+
+
+        }
     }
 
 
@@ -360,6 +352,38 @@ ApplicationWindow {
             applicationName.text = "Base de travail : " + name
         }
 
+
+       function onAffichePreferences() {
+           menuHome.isActive = false
+           pageHome.visible = false
+           menuImportCnx.isActive = false
+           pageConnexion.visible = false
+           menuImportEvt.isActive = false
+           pageEvenement.visible = false
+           menuSettings.isActive = true
+           pagePreference.visible = true
+           menuInformation.isActive = false
+           pageInformation.visible = false
+       }
+
+       function onSetColor(newCouleur) {
+           couleur = newCouleur
+       }
+
+       function onSetMode(newMode) {
+           mode = newMode
+       }
+
+       function onSetNoWorkingDir() {
+           console.log("main.qml : signal setNoWorkingDir reçu !")
+           message.text = qsTr("Le dossier sélectionné n'est pas vide !")
+           message.opacity = 1
+           messageAnnimation.start()
+
+       }
+
     }
+
+
 
 }
