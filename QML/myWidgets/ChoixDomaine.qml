@@ -56,10 +56,11 @@ Frame {
         }
 
         ComboBox {
-            id: comboBox
+            id: comboBoxDomain
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: labelDomain.right
             anchors.leftMargin: 10
+            onCurrentValueChanged: backend.preselectDomaine(currentText)
         }
 
         Button {
@@ -70,9 +71,10 @@ Frame {
             text: qsTr("Sélectionner")
             anchors.verticalCenter: parent.verticalCenter
             width: buttonWidth
-            highlighted: true
-            Material.accent: Material.LightGreen
-            onClicked: folderDialog.open()
+            highlighted: false
+            enabled: false
+            Material.accent: Material.LightBlue
+            onClicked: backend.selectDomaine(comboBoxDomain.currentText)
         }
 
         Button {
@@ -81,9 +83,11 @@ Frame {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             width: buttonWidth
-            highlighted: true
+            highlighted: false
+            enabled: false
             Material.accent: Material.Orange
-            onClicked: folderDialog.open()
+//            onClicked: backend.delDomaine(comboBoxDomain.currentText)
+            onClicked: messageDialog.open()
         }
 
     }
@@ -107,10 +111,17 @@ Frame {
         }
 
         RetentionCalcul {
+            id: retentionBdd
             unite: "mois"
-            duree: 12
-            onDureeChanged: console.log("changement : " + duree + unite)
-
+            duree: 6
+            //onDureeChanged: console.log("changement : " + duree + unite)
+            onDureeChanged: backend.checkRetention(comboBoxDomain.currentText,
+                                                    retentionBdd.duree,
+                                                    retentionBdd.unite,
+                                                    retentionCnx.duree,
+                                                    retentionCnx.unite,
+                                                    retentionEvt.duree,
+                                                    retentionEvt.unite)
         }
     }
 
@@ -132,7 +143,15 @@ Frame {
         }
 
         RetentionCalcul {
-            onDureeChanged: console.log("changement : " + duree + unite)
+            id: retentionCnx
+            //onDureeChanged: console.log("changement : " + duree + unite) // il faut enregistrer la nouvelle valeur
+            onDureeChanged: backend.checkRetention(comboBoxDomain.currentText,
+                                                    retentionBdd.duree,
+                                                    retentionBdd.unite,
+                                                    retentionCnx.duree,
+                                                    retentionCnx.unite,
+                                                    retentionEvt.duree,
+                                                    retentionEvt.unite)
         }
     }
 
@@ -153,7 +172,15 @@ Frame {
         }
 
         RetentionCalcul {
-            onDureeChanged: console.log("changement : " + duree + unite)
+            id: retentionEvt
+            //onDureeChanged: console.log("changement : " + duree + unite)
+            onDureeChanged: backend.checkRetention(comboBoxDomain.currentText,
+                                                    retentionBdd.duree,
+                                                    retentionBdd.unite,
+                                                    retentionCnx.duree,
+                                                    retentionCnx.unite,
+                                                    retentionEvt.duree,
+                                                    retentionEvt.unite)
         }
     }
 
@@ -162,8 +189,74 @@ Frame {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         width: buttonWidth
+        highlighted: false
+        enabled: false
+        Material.accent: Material.LightGreen
         text: qsTr("Valider")
+        onClicked: {
+            backend.saveRetention(comboBoxDomain.currentText,
+            retentionBdd.duree, retentionBdd.unite,
+            retentionCnx.duree, retentionCnx.unite,
+            retentionEvt.duree, retentionEvt.unite);
+
+			valider.enabled = false;
+			valider.highlighted = false;
+        }
 
     }
+
+
+
+    Dialog {
+        id: messageDialog
+        anchors.centerIn: parent
+        modal: true
+        title: "Suppression du domaine " + comboBoxDomain.currentText + " ?"
+        standardButtons: MessageDialog.No | MessageDialog.Yes
+        visible: false
+        onAccepted: backend.delDomaine(comboBoxDomain.currentText)
+        onRejected: messageDialog.close()
+    }
+
+    Connections{
+        target: backend
+
+        function onSetDomaines(domaines) {
+            comboBoxDomain.model = domaines
+        }
+
+        function onInitDomaines(domaines, domaine) {
+            comboBoxDomain.model = domaines
+            while (comboBoxDomain.currentText !== domaine) {
+                comboBoxDomain.incrementCurrentIndex()
+            }
+
+        }
+
+        function onSetRetention(retention) {
+            retentionBdd.unite = retention["BddUnit"]
+            retentionBdd.duree = retention["BddValue"]
+            retentionCnx.unite = retention["CnxUnit"]
+            retentionCnx.duree = retention["CnxValue"]
+            retentionEvt.unite = retention["EvtUnit"]
+            retentionEvt.duree = retention["EvtValue"]
+            //console.log("retentionCnx.unite : " + retentionCnx.unite)
+            //console.log("retentionCnx.value : " + retentionCnx.duree)
+        }
+
+		function onChangeRetention(changed) {
+			valider.enabled = changed
+			valider.highlighted = changed
+		}
+
+        function onChangeDomaine(boutonValide) {
+            buttonChoixDomaine.enabled = boutonValide
+            buttonChoixDomaine.highlighted = boutonValide
+            buttonDelDomaine.enabled = boutonValide
+            buttonDelDomaine.highlighted = boutonValide
+        }
+    }
+
+
 
 }

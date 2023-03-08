@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Controls.Material
 import QtQuick.Dialogs
-//import Qt.labs.folderlistmodel
 import QtCore
 
 import "../myWidgets"
@@ -72,7 +71,6 @@ Rectangle {
         }
 
 
-
         // Nouveau domaine de travail
         Row {
             id: newDomaine
@@ -87,18 +85,18 @@ Rectangle {
             }
 
             TextField {
-                id: textFieldNewDoamine
+                id: textFieldNewDomaine
                 width: 352
                 anchors.verticalCenter: parent.verticalCenter
                 placeholderText: qsTr(nameNewDomaines)
+                onAccepted: backend.newDomaine(textFieldNewDomaine.text)
             }
 
             Button {
                 id: buttonChoixNewDomaine
                 text: qsTr("Créer")
                 anchors.verticalCenter: parent.verticalCenter
-                onClicked: folderDialog.open()
-                //width: buttonChoixDossierTravail.width
+                onClicked: backend.newDomaine(textFieldNewDomaine.text)
             }
         }
 
@@ -108,9 +106,6 @@ Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
             windowMode: windowMode
             materialColor: materialColor
-//            frameWidth: delDomaine.width + 20
-            //buttonWidth: buttonChoixDossierTravail.width
-
         }
 
         ChoixCouleur {
@@ -123,47 +118,19 @@ Rectangle {
     } //Column
 
 
-/*
-    FolderDialog {
-        id: folderDialogTravail
-        currentFolder: StandardPaths.writableLocation(StandardPaths.AppLocalDataLocation)
-        onAccepted: {
-            workingDirectory = selectedFolder.toString().replace(Qt.resolvedUrl(StandardPaths.writableLocation(StandardPaths.AppLocalDataLocation)), "~")
-//            workingDirectory = selectedFolder.toString().replace('file://','')
-            //textFieldDossierTravail.text = workingDirectory
-            //toolTip.text = workingDirectory
-            //alertDossierTravail.opacity = 0
-            // Il faut enregistrer le setting dans le fichier python
-            console.log("Working Drectory : " + selectedFolder.toString())
-            backend.workingDir(selectedFolder.toString().replace('file://',''))
-        }
-    }
-*/
-
     Connections{
         target: backend
-/*
-        function onSetConnexionDir(nomDossier) {
-            alertDossierConnexions = 0
-            nameDossierConnexions = nomDossier
-         }
 
-        function onSetEvenementDir(nomDossier) {
-            alertDossierEvenements = 0
-            nameDossierEvenements = nomDossier
-         }
-*/
         function onSetBddDir(nomDossier) {
             alertDossierTravailVide = 0
             nameDossierTravail = nomDossier
             textFieldDossierTravail.enabled = true
          }
 
-        function onSetNoWorkingDir() {
-            labelDossierTravail.text = qsTr("Dossier de travail :")
-            alertDossierTravailVide = 1
+        function onSetDomaines(domaine) {
+            //console.log("preference.qml : On efface le text saisi")
+			textFieldNewDomaine.text = ""
         }
-
     }
 
 

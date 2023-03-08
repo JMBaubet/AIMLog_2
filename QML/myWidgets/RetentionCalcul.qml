@@ -5,8 +5,8 @@ import QtQuick.Dialogs
 
 Row {
 
-    property int duree: 30
-    property string unite: "jours"
+    property int duree: 3
+    property string unite: "mois"
 
     SpinBox {
         id: dureeSpinBox
@@ -61,4 +61,5 @@ Row {
         text: qsTr(unite)
 
     }
+
 }

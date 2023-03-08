@@ -22,5 +22,17 @@
         <file>icons/light/chevron-down.svg</file>
         <file>icons/dark/chevron-up.svg</file>
         <file>icons/dark/chevron-down.svg</file>
+        <file>icons/dark/chevron-left.svg</file>
+        <file>icons/dark/chevron-right.svg</file>
+        <file>icons/dark/chevrons-left.svg</file>
+        <file>icons/dark/chevrons-right.svg</file>
+        <file>icons/light/chevron-right.svg</file>
+        <file>icons/light/chevron-left.svg</file>
+        <file>icons/light/chevrons-left.svg</file>
+        <file>icons/light/chevrons-right.svg</file>
+        <file>icons/light/calendar.svg</file>
+        <file>icons/light/clock.svg</file>
+        <file>icons/dark/calendar.svg</file>
+        <file>icons/dark/clock.svg</file>
     </qresource>
 </RCC>

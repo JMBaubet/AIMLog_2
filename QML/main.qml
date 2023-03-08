@@ -8,7 +8,8 @@ import QtCore
 import "myWidgets"
 
 
-ApplicationWindow {
+
+Window {
     id: window
 
     property int couleur: Material.Indigo
@@ -89,9 +90,11 @@ ApplicationWindow {
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: imageMoon.left
             anchors.rightMargin: 10
-            checked: mode ? true : false
-//            onToggled: mode = checked // mode et checked ont les valeurs 0 ou 1
-            onToggled: backend.selectionMode(checked)
+            checked: mode
+            onToggled: {
+//                mode = ~ mode
+                backend.selectionMode(checked)
+            }
         }
 
         Image {
@@ -114,12 +117,11 @@ ApplicationWindow {
     }  // fin de la topBar
 
     // VerticalMenu
-
     Rectangle {
         id: verticalMenu
         width: 70 //240
         anchors.top: topBar.bottom
-        anchors.bottom: bottomBar.top
+        anchors.bottom: parent.bottom
         color: Material.color(couleur, Material.ShadeA500)
         clip: true // si pas positionné la souris est active sur 240 pixels de large
 
@@ -179,6 +181,8 @@ ApplicationWindow {
                 pagePreference.visible = false
                 menuInformation.isActive = false
                 pageInformation.visible = false
+                // lecture du repertoire cnx du domaine
+                backend.lireCnxFile()
             }
         }
 
@@ -202,6 +206,8 @@ ApplicationWindow {
                 pagePreference.visible = false
                 menuInformation.isActive = false
                 pageInformation.visible = false
+                // lecture du repertoire evt du domaine
+                backend.lireEvtFile()
             }
         }
 
@@ -236,6 +242,7 @@ ApplicationWindow {
             anchors.left: parent.left
 
             anchors.bottom: parent.bottom
+            anchors.bottomMargin: 48
             btnIconSource: "info.svg"
             btnText: "Informations"
             onClicked: {
@@ -312,13 +319,16 @@ ApplicationWindow {
 
     }
 
+    // La basse de dessous
     Rectangle {
         id: bottomBar
         height: 48
-        color: Material.color(couleur, Material.Shade700)
-        anchors.left: parent.left
+//        color: Material.color(couleur, Material.Shade700)
+        color: mode ? "#2D2D2D" : "#F6F6F6"
+        anchors.left: verticalMenu.right
         anchors.right: parent.right
         anchors.bottom: parent.bottom
+        anchors.leftMargin: 0
 
         Label {
             id: message
@@ -327,7 +337,7 @@ ApplicationWindow {
             anchors.verticalCenter: parent.verticalCenter
             width: 300
             opacity: 1
-            text: qsTr("")
+            text: qsTr("test")
             font.bold: true
 
             PropertyAnimation{
@@ -337,10 +347,9 @@ ApplicationWindow {
                 to: if (message.text !== "") return 0
                 duration: 2500
                 easing.type: Easing.InElastic
+
                 easing.period: 3
             }
-
-
         }
     }
 
@@ -348,12 +357,12 @@ ApplicationWindow {
     Connections{
         target: backend
 
-       function onSetDatabase(name) {
-            applicationName.text = "Base de travail : " + name
+        function onSetDomaine(domaine) {
+            //console.log("domaine : " + domaine)
+            applicationName.text = qsTr("Domaine de travail : <b>") + domaine + "</b>"
         }
 
-
-       function onAffichePreferences() {
+        function onAffichePreferences() {
            menuHome.isActive = false
            pageHome.visible = false
            menuImportCnx.isActive = false
@@ -364,24 +373,64 @@ ApplicationWindow {
            pagePreference.visible = true
            menuInformation.isActive = false
            pageInformation.visible = false
-       }
+        }
 
-       function onSetColor(newCouleur) {
-           couleur = newCouleur
-       }
 
-       function onSetMode(newMode) {
-           mode = newMode
-       }
+        function onSetColor(newCouleur) {
+            couleur = newCouleur
+        }
 
+        function onSetMode(newMode) {
+            mode = newMode
+        }
+
+        function onSetMsg(text, level) {
+            // Voir les actions en fonction du level...
+            // Idées : jouer sur la durée du message, sur la couleur
+            // Debug = 0
+            // Info = 1
+            // Warning = 2
+            // Error = 3
+            // Critical =4
+            // console.log("onSetMsg : ", text, " ", level )
+            switch (level) {
+                  case 0: //Debug
+                      message.color = Material.color(Material.LightGreen, Material.Shade200)
+                      messageAnnimation.duration = 2500
+                       break
+                  case 1: // Info
+                      message.color = Material.color(Material.LightGreen)
+                      messageAnnimation.duration = 2500
+                      break
+                  case 2: // Warning
+                      message.color = Material.color(Material.Orange)
+                      messageAnnimation.duration = 4000
+                      break
+                  case 3: // Error
+                      message.color = Material.color(Material.Red)
+                      messageAnnimation.duration = 5000
+                      break
+                  case 4: // Critical
+                      message.color = Material.color(Material.DeepPurple)
+                      messageAnnimation.duration = 5000
+                      break
+
+                  default:
+            }
+            message.text = text
+            message.opacity = 1
+            messageAnnimation.start()
+
+        }
+
+       /*
        function onSetNoWorkingDir() {
            console.log("main.qml : signal setNoWorkingDir reçu !")
            message.text = qsTr("Le dossier sélectionné n'est pas vide !")
            message.opacity = 1
            messageAnnimation.start()
-
        }
-
+*/
     }
 
 
