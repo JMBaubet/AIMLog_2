@@ -1,8 +1,5 @@
 from PySide6.QtSql import QSqlQuery
 from PySide6.QtCore import QStandardPaths, QDateTime
-from datetime import datetime
-
-
 
 
 def connecDataBase(mydb, name):
@@ -74,7 +71,7 @@ def createTable(mydb):
             receiver VARCHAR(20),
             transmiter VARCHAR(20),
             user VARCHAR(20),
-            chanel VARCHAR(20),
+            channel VARCHAR(20),
             ip_adress VARCHAR(17),
             user_agent VARCHAR(80)
         )
@@ -144,9 +141,9 @@ def listPosition(mydb, domaine):
         print("Qquery.exec() - Error!")
         print("Database Error: {}".format(query.lastError().databaseText()))
     else:
-        print("Sélection OK")
+        # print("Sélection OK")
         while query.next():
-            print("On ajoute <{}> à la liste des positions.".format(query.value(0)))
+            # print("On ajoute <{}> à la liste des positions.".format(query.value(0)))
             listReceiver.append(query.value(0))
         query.finish()
     return listReceiver
@@ -173,7 +170,7 @@ def firstDate(mydb, domaine):
         print("Database Error: {}".format(query.lastError().databaseText()))
     else:
         while query.next():
-            print("Min start_time of connexions : <{}>".format(query.value(0)) )
+            # print("Min start_time of connexions : <{}>".format(query.value(0)) )
             # date_time_connexions = datetime.fromisoformat (query.value(0))
             date_time_connexions = QDateTime.fromString(query.value(0),"yyyy-MM-dd hh:mm:ss")
         query.finish()
@@ -186,7 +183,7 @@ def firstDate(mydb, domaine):
         print("Database Error: {}".format(query.lastError().databaseText()))
     else:
         while query.next():
-            print("Min date_time of evenements : <{}>".format(query.value(0)) )
+            # print("Min date_time of evenements : <{}>".format(query.value(0)) )
             # date_time_evenements = datetime.fromisoformat (query.value(0))
             date_time_evenements = QDateTime.fromString(query.value(0),"yyyy-MM-dd hh:mm:ss")
         query.finish()
@@ -206,7 +203,7 @@ def firstDate(mydb, domaine):
             print("Database Error: {}".format(query.lastError().databaseText()))
         else:
             while query.next():
-                print("MAX start_time of connexions : <{}>".format(query.value(0)) )
+                # print("MAX start_time of connexions : <{}>".format(query.value(0)) )
                 # date_time_connexions = datetime.fromisoformat (query.value(0))
                 date_time_connexions = QDateTime.fromString(query.value(0),"yyyy-MM-dd hh:mm:ss")
             query.finish()
@@ -219,7 +216,7 @@ def firstDate(mydb, domaine):
             print("Database Error: {}".format(query.lastError().databaseText()))
         else:
             while query.next():
-                print("MAX date_time of evenements : <{}>".format(query.value(0)) )
+                # print("MAX date_time of evenements : <{}>".format(query.value(0)) )
                 # date_time_evenements = datetime.fromisoformat (query.value(0))
                 date_time_evenements = QDateTime.fromString(query.value(0),"yyyy-MM-dd hh:mm:ss")
             query.finish()
@@ -229,6 +226,88 @@ def firstDate(mydb, domaine):
             dates.append(date_time_evenements)
 
     return(dates)
+
+
+def queryAnalyseCnx(mydb, domaine, date, position):
+    query = QSqlQuery()
+    dir = QStandardPaths.writableLocation(QStandardPaths.AppLocalDataLocation)
+    listCnx = []
+    cnx = []
+    couple = []
+    # On se connecte à la base de donnée du domaine
+    mydb.setDatabaseName(dir + "/" + domaine + ".sqlite")
+    if not mydb.open():
+        print("Database Error: {}".format(mydb.lastError().databaseText()))
+
+    heure_debut = date.addSecs(-15 * 60)
+    heure_fin = date.addSecs(5 * 60)
+
+    # end_time >= heure_debut && start_time <= heure_fin
+    my_query =  "SELECT start_time, end_time, channel, user FROM connexions WHERE receiver like '{}' AND ".format(position)
+    my_query += "end_time >= '{}' AND start_time <= '{}' ".format(heure_debut.toString("yyyy-MM-dd hh:mm:ss"), heure_fin.toString("yyyy-MM-dd hh:mm:ss"))
+
+    # print("query : <{}>".format(my_query))
+
+    if not query.exec("""{}""".format(my_query)):
+        print("Database Error: {}".format(query.lastError().databaseText()))
+    else:
+        while query.next():
+            # print("On ajoute <{}> à la liste des connexions.".format(query.value(0)))
+            couple = ['start_time', query.value("start_time")]
+            cnx.append(couple)
+            couple = ['end_time', query.value("end_time")]
+            cnx.append(couple)
+            couple = ['channel', query.value("channel")]
+            cnx.append(couple)
+            couple = ['user', query.value("user")]
+            cnx.append(couple)
+            # print("On ajoute : <{}>".format(cnx))
+            listCnx.append(cnx)
+            cnx=[]
+        query.finish()
+    return listCnx
+
+
+def queryAnalyseEvt(mydb, domaine, date):
+    query = QSqlQuery()
+    dir = QStandardPaths.writableLocation(QStandardPaths.AppLocalDataLocation)
+    listEvt = []
+    evt = {}
+    # On se connecte à la base de donnée du domaine
+    mydb.setDatabaseName(dir + "/" + domaine + ".sqlite")
+    if not mydb.open():
+        print("Database Error: {}".format(mydb.lastError().databaseText()))
+
+    heure_debut = date.addSecs(-15 * 60)
+    heure_fin = date.addSecs(5 * 60)
+
+    # end_time >= heure_debut && start_time <= heure_fin
+    my_query =  "SELECT datetime, event, detail, receiver, transmiter, user, channel, ip_adress  FROM evenements WHERE  "
+    my_query += "datetime >= '{}' AND datetime <= '{}' ".format(heure_debut.toString("yyyy-MM-dd hh:mm:ss"), heure_fin.toString("yyyy-MM-dd hh:mm:ss"))
+
+    # print("query : <{}>".format(my_query))
+
+    if not query.exec("""{}""".format(my_query)):
+        print("Database Error: {}".format(query.lastError().databaseText()))
+    else:
+        while query.next():
+            # print("On ajoute <{}> à la liste des connexions.".format(query.value(0)))
+            evt["datetime"] =  query.value("datetime")
+            evt["event"] =  query.value("event")
+            evt["detail"] =  query.value("detail")
+            evt["receiver"] =  query.value("receiver")
+            evt["transmiter"] =  query.value("transmiter")
+            evt["user"] =  query.value("user")
+            evt["channel"] =  query.value("channel")
+            evt["ip_adress"] =  query.value("ip_adress")
+            # print(evt)
+            listEvt.append(evt)
+        query.finish()
+#    for element in listEvt:
+#        print("evenement : {}".format(element))
+    return listEvt
+
+
 
 
 

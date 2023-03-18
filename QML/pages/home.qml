@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Controls.Material
+import QtQml
 
 
 import "../myWidgets"
@@ -11,6 +12,9 @@ Rectangle {
     property int windowMode: Material.Light
     property bool selectDateisVisible: false
     property bool selectHeureisVisible: false
+    property bool selectedDate: false
+    property bool selectedHeure: false
+    property bool selectedPosition: false
 
 
 
@@ -33,14 +37,15 @@ Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
     }
 
-    Rectangle {
+    Frame {
         id: choix
         anchors.top: titre.bottom
         anchors.margins: 20
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: parent.width - 2 * anchors.margins
-        height: 40
-        color: Material.color(couleur, Material.ShadeA500)
+        anchors.left: parent.left
+        anchors.right: parent.right
+
+        height: 60
+        //color: Material.color(couleur, Material.ShadeA500)
 
 
         Label {
@@ -96,8 +101,11 @@ Rectangle {
 
         SelectDate {
             id: selectDate
+            width: 320
+            height: 48
             anchors.horizontalCenter: dateBtn.horizontalCenter
-            anchors.top: choix.bottom
+            anchors.top: parent.bottom
+            anchors.topMargin: 20
             //anchors.top: choix.bottom
             //anchors.left: textFieldDate.left
             mode: windowMode
@@ -121,7 +129,7 @@ Rectangle {
             anchors.leftMargin: 10
             //width: 50
             anchors.verticalCenter: parent.verticalCenter
-            text: qsTr("Heure")
+            text: qsTr("--:--")
         }
 
         Button {
@@ -159,7 +167,9 @@ Rectangle {
         SelectHeure {
             id: selectHeure
             anchors.horizontalCenter: heureBtn.horizontalCenter
-            anchors.top: choix.bottom
+            anchors.top: parent.bottom
+            anchors.topMargin: 20
+
             //anchors.top: choix.bottom
             //anchors.left: textFieldDate.left
             mode: windowMode
@@ -202,10 +212,39 @@ Rectangle {
             anchors.left: textPosition.right
             anchors.leftMargin: 10
             //onCurrentValueChanged: backend.selectSite(currentText)
+            onHighlighted: {
+                selectedPosition = true
+                backend.selectSite()
+            }
+        }
 
+        Button {
+            id: analyseBtn
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.right: parent.right
+            //flat: true
+            anchors.rightMargin: 20
+            highlighted: false
+            enabled: false
+            Material.accent: Material.Green
+            text: "Analyse"
+            onClicked: {
+                //console.log("date time" + Date.fromLocaleString(Qt.locale("fr_FR"), textFieldDate.text + " " + textFieldHeure.text, "ddd dd MMM yyyy hh:mm"))
+                backend.analyse(Date.fromLocaleString(Qt.locale("fr_FR"), textFieldDate.text + " " + textFieldHeure.text, "ddd dd MMM yyyy hh:mm"), comboBoxPosition.currentText)
+            }
         }
 
 
+    }
+
+    Connexions {
+        id: schemaCnx
+        couleur: materialColor
+        mode: windowMode
+        anchors.top: choix.bottom
+        anchors.topMargin: 10
+        dateEvent: Date.fromLocaleString(Qt.locale("fr_FR"), textFieldDate.text + " " + textFieldHeure.text, "ddd dd MMM yyyy hh:mm")
+        position: comboBoxPosition.currentText
     }
 
 
@@ -214,21 +253,40 @@ Rectangle {
 
         function onSetDate(jour, mois, annee, dateStr) {
             selectDateisVisible = !selectDateisVisible
+            selectedDate = true
             textFieldDate.text = dateStr
             textFieldDate.font.bold = true
             textFieldDate.font.pointSize = 14
+            if ( selectedDate && selectedHeure && selectedPosition ) {
+                analyseBtn.enabled = true
+                analyseBtn.highlighted = true
+            }
         }
 
         function onSetHeure(heure, minute) {
             selectHeureisVisible = !selectHeureisVisible
-            textFieldHeure.text = heure.toString().padStart(2, '0') + "h" + minute.toString().padStart(2, '0')
+            selectedHeure = true
+            textFieldHeure.text = heure.toString().padStart(2, '0') + ":" + minute.toString().padStart(2, '0')
             textFieldHeure.font.bold = true
             textFieldHeure.font.pointSize = 14
+            if ( selectedDate && selectedHeure && selectedPosition) {
+                analyseBtn.enabled = true
+                analyseBtn.highlighted = true
+            }
 
         }
 
         function onSetListPositions(listPosition) {
             comboBoxPosition.model = listPosition
+        }
+
+        function onSetSelectedPosition() {
+            selectedPosition = true
+            if ( selectedDate && selectedHeure && selectedPosition) {
+                analyseBtn.enabled = true
+                analyseBtn.highlighted = true
+            }
+
         }
 
     }

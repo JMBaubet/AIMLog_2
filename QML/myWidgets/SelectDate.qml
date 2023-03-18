@@ -389,7 +389,7 @@ Rectangle {
         }
 
         function onSetDates(dates) {
-            console.log("first-date recoit : " + dates[0])
+            // console.log("first-date recoit : " + dates[0])
             firstDate = dates[0]
             lastDate = dates[1]
         }

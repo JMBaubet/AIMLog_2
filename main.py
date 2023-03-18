@@ -8,11 +8,11 @@ from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtCore import QObject, Slot, Signal
 from PySide6.QtCore import QSettings  # from PySide6.QtCore import QStandardPaths
 from PySide6.QtSql import QSqlDatabase
-from PySide6.QtCore import QStandardPaths
+from PySide6.QtCore import QStandardPaths, QDateTime
 
 from modules.myFunction import checkSetting, createDomaine, removeDomaine, retentionChanged
 from modules.myFunction import backupRetention, loadRetention, checkConnexionFile, checkEventFile
-from modules.myFunction import supprimeFile, inmportCnxToBdd, inmportEvtToBdd
+from modules.myFunction import supprimeFile, inmportCnxToBdd, inmportEvtToBdd, lanceAnalyse
 from modules.mySQLite import changeDatabase, listPosition, firstDate
 
 import rc_icons  # Utile pour avoir les icons dans le menu de gauche
@@ -55,7 +55,11 @@ class Backend(QObject):
     setDate = Signal(int, int, int, str)
     setHeure = Signal(int, int)
     setListPositions = Signal(list)     # pages/home.qml
+    setSelectedPosition = Signal()      # pages/home.qml
     setDates = Signal(list)             # QML/myWidgets/SelectDate
+    setData = Signal(list, str)              # QML/MyWidgets/Connexions.qml
+    setHeureSelect = Signal(QDateTime, str)           # main.qml
+
 
     #    setNoWorkingDir = Signal() # main.qml, QML/pages/preference.qml
 
@@ -268,6 +272,27 @@ class Backend(QObject):
     def sendMessage(self, message, level):
         self.setMsg.emit(message, level)
 
+    @Slot()
+    def selectSite(self):
+        self.setSelectedPosition.emit()
+
+
+    @Slot(QDateTime, str)
+    def analyse(self, myDate, position):
+
+        # print("date : {}".format(myDate.date() ))
+        # print("heure : {}".format(myDate.time() ))
+        listCnx, listEvt = lanceAnalyse(settings, mydb, myDate, position)
+        self.setData.emit(listCnx, position)
+        # self.setData.emit(listCnx, listEvt)
+
+
+    @Slot(int, QDateTime)
+    def moveCurseur(self, x, dateEvent):
+        # print("PoisitionX : {}".format(x))
+        dateCurseur = dateEvent.addSecs(x - 940)
+        # print("Heure sélectionnée : {}".format(dateCurseur.toString("HH.mm.ss") ))
+        self.setHeureSelect.emit(dateCurseur, dateCurseur.toString("HH.mm.ss"))
 
 
 
@@ -282,11 +307,11 @@ if __name__ == "__main__":
     app.setOrganizationName("Adder")
     #    app.setOrganizationDomain("lfpg.aviation-civile.gouv.fr")
     app.setApplicationName("AIMLog2")
-    settings = QSettings()
 
     mydb = QSqlDatabase.addDatabase("QSQLITE")
 
     # Get Context
+    settings = QSettings()
     backendWindow = Backend(settings)
     engine.rootContext().setContextProperty("backend", backendWindow)
 

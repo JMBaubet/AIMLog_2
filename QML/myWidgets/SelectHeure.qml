@@ -22,6 +22,7 @@ Rectangle {
     color: Material.backgroundColor
     width: 240
 
+
     // HEURE
     Rectangle {
         id: choixHheure

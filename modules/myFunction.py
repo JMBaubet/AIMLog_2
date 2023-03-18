@@ -2,7 +2,7 @@ import os
 import glob
 import shutil
 from PySide6.QtCore import QStandardPaths
-from modules.mySQLite import connecDataBase, createTable, insertRecords, listPosition, firstDate
+from modules.mySQLite import connecDataBase, createTable, insertRecords, listPosition, firstDate, queryAnalyseCnx, queryAnalyseEvt
 import zipfile
 import csv
 from datetime import datetime
@@ -46,7 +46,7 @@ def checkSetting(backend, settings, mydb):
 
     # Lecture du domaine actif
     domaine = settings.value("DomaineActif")
-    print("domaine actif : {}".format(domaine))
+    # print("domaine actif : {}".format(domaine))
     backend.setDomaine.emit(domaine)
 
     # Lecture des domaines
@@ -266,7 +266,7 @@ def inmportCnxToBdd(settings, bdd, fichier):
                 print("Erreur de format dans la date de début de connexion sur la ligne {}".format(i))
             try:
                 end_time = datetime.strptime(lines[i][2], "%Y-%m-%d %H:%M:%S")
-                end_time = lines[i][1]
+                end_time = lines[i][2]
             except ValueError:
                 end_time = date_futur
 
@@ -332,7 +332,6 @@ def inmportEvtToBdd(settings, bdd, fichier):
         return erreur, message
 
 
-
     records = []
     date_futur = "2100-01-01 00:00:00" # pas nécessaire dans le fichier event
 
@@ -390,14 +389,13 @@ def inmportEvtToBdd(settings, bdd, fichier):
         level = 1
     return level, message
 
-"""
 
-def getPosition(settings, bdd):
+
+def lanceAnalyse(settings, mydb, date, position):
     domaine = settings.value("DomaineActif")
-    return listPosition(bdd, domaine)
-
-"""
-
+    listCnx = queryAnalyseCnx(mydb, domaine, date, position)
+    listEvt = queryAnalyseEvt(mydb, domaine, date)
+    return listCnx, listEvt
 
 
 
