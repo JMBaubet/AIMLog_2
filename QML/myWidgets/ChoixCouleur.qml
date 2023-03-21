@@ -37,8 +37,7 @@ Frame {
         }
     }
 
-    // TODO
-    // remplacer l'ensemble par un Repeater
+    // TODO : Remplacer l'ensemble par un Repeater
     Row {
         id: listRextangle
         anchors.top: rectanglechoixDomaine.bottom
