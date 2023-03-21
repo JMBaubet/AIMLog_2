@@ -25,7 +25,7 @@ Window {
     minimumHeight: 640
 
     visible: true
-    title: qsTr("MAKI : Analyse des connexions")
+    title: qsTr("MAKI : Analyse des connexions et des évènements")
 
     Rectangle {
         id: topBar
@@ -272,7 +272,7 @@ Window {
         Loader {
             id: pageHome
             anchors.fill: parent
-            source: Qt.resolvedUrl("pages/home.qml")
+            source: Qt.resolvedUrl("pages/pgAnalyse.qml")
             visible: true
             clip: true
         }
@@ -280,7 +280,7 @@ Window {
         Loader {
             id: pageConnexion
             anchors.fill: parent
-            source: Qt.resolvedUrl("pages/connexion.qml")
+            source: Qt.resolvedUrl("pages/pgCnx.qml")
             visible: false
             clip: true
         }
@@ -288,7 +288,7 @@ Window {
         Loader {
             id: pageEvenement
             anchors.fill: parent
-            source: Qt.resolvedUrl("pages/evenement.qml")
+            source: Qt.resolvedUrl("pages/pgEvt.qml")
             visible: false
             clip: true
         }
@@ -304,7 +304,7 @@ Window {
         Loader {
             id: pagePreference
             anchors.fill: parent
-            source: Qt.resolvedUrl("pages/preference.qml")
+            source: Qt.resolvedUrl("pages/pgPref.qml")
             visible: false
             clip: true
         }
@@ -312,7 +312,7 @@ Window {
         Loader {
             id: pageInformation
             anchors.fill: parent
-            source: Qt.resolvedUrl("pages/information.qml")
+            source: Qt.resolvedUrl("pages/pgInfo.qml")
             visible: false
             clip: true
         }
@@ -337,7 +337,7 @@ Window {
             anchors.verticalCenter: parent.verticalCenter
             width: 300
             opacity: 1
-            text: qsTr("test")
+            text: ""
             font.bold: true
 
             PropertyAnimation{
@@ -352,6 +352,7 @@ Window {
             }
         }
     }
+    Component.onCompleted: backend.onSetMsg(qsTr("Bienvenue sur l'application."), 1)
 
 
     Connections{

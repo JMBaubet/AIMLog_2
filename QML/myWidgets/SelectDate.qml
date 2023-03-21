@@ -371,8 +371,6 @@ Rectangle {
                             date.toLocaleString(Qt.locale(),"yyyy"),
                             date.toLocaleString(Qt.locale("fr-FR"),"ddd dd MMM yyyy"))
 
-
-
        }
 
     }
@@ -389,7 +387,8 @@ Rectangle {
         }
 
         function onSetDates(dates) {
-            // console.log("first-date recoit : " + dates[0])
+            //console.log("first-date recoit : " + dates[0])
+            //console.log("last-date recoit : " + dates[1])
             firstDate = dates[0]
             lastDate = dates[1]
         }

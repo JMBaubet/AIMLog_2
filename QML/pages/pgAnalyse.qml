@@ -25,7 +25,7 @@ Rectangle {
     implicitHeight: 942
     anchors.fill: parent
     color: Material.backgroundColor
-
+/*
     Label {
         id: titre
         text: qsTr("Analyse des connexions et des évènements.")
@@ -36,10 +36,10 @@ Rectangle {
         font.pointSize: 20
         anchors.horizontalCenter: parent.horizontalCenter
     }
-
+*/
     Frame {
         id: choix
-        anchors.top: titre.bottom
+        anchors.top: parent.top
         anchors.margins: 20
         anchors.left: parent.left
         anchors.right: parent.right
@@ -93,7 +93,13 @@ Rectangle {
             onClicked: if (selectHeureisVisible) {
                            selectDateisVisible = false
                            backend.sendMessage("Vous devez fermer l'horloge, pour ouvrir le calendrier !", 2)
-                       } else {
+                       }
+                       else if (selectDateisVisible) {
+                           schemaCnx.z=0
+                           selectDateisVisible = !selectDateisVisible
+                       }
+                       else {
+                           schemaCnx.z=-1
                            selectDateisVisible = !selectDateisVisible
                        }
         }
@@ -156,12 +162,20 @@ Rectangle {
                 fillMode: Image.PreserveAspectFit
             }
 
-            onClicked: if (selectDateisVisible) {
-                           selectHeureisVisible = false
-                           backend.sendMessage("Vous devez fermer le calendrier, pour ouvrir l'horloge !", 2)
-                       } else {
-                           selectHeureisVisible = !selectHeureisVisible
-                       }
+            onClicked: {
+                if (selectDateisVisible) {
+                    selectHeureisVisible = false
+                    backend.sendMessage("Vous devez fermer le calendrier, pour ouvrir l'horloge !", 2)
+                }
+                else if (selectHeureisVisible) {
+                    schemaCnx.z=0
+                    selectHeureisVisible = !selectHeureisVisible
+                }
+                else {
+                    schemaCnx.z=-1
+                    selectHeureisVisible = !selectHeureisVisible
+                }
+            }
         }
 
         SelectHeure {
@@ -229,6 +243,8 @@ Rectangle {
             Material.accent: Material.Green
             text: "Analyse"
             onClicked: {
+                //console.log("pgAnalyse : Bouton Analyse cliqué")
+                schemaCnx.z = 0
                 //console.log("date time" + Date.fromLocaleString(Qt.locale("fr_FR"), textFieldDate.text + " " + textFieldHeure.text, "ddd dd MMM yyyy hh:mm"))
                 backend.analyse(Date.fromLocaleString(Qt.locale("fr_FR"), textFieldDate.text + " " + textFieldHeure.text, "ddd dd MMM yyyy hh:mm"), comboBoxPosition.currentText)
             }
@@ -242,7 +258,8 @@ Rectangle {
         couleur: materialColor
         mode: windowMode
         anchors.top: choix.bottom
-        anchors.topMargin: 10
+        anchors.left: parent.left
+        anchors.margins: 20
         dateEvent: Date.fromLocaleString(Qt.locale("fr_FR"), textFieldDate.text + " " + textFieldHeure.text, "ddd dd MMM yyyy hh:mm")
         position: comboBoxPosition.currentText
     }

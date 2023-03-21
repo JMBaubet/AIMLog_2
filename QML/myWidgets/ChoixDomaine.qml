@@ -230,7 +230,6 @@ Frame {
             while (comboBoxDomain.currentText !== domaine) {
                 comboBoxDomain.incrementCurrentIndex()
             }
-
         }
 
         function onSetRetention(retention) {

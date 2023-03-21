@@ -136,7 +136,7 @@ Si vous voulez importer des nouvelles données dans la base, vous devez téléch
              anchors.rightMargin: 20
              highlighted: false
              Material.accent: Material.Green
-             onClicked: backend.importEvtFile(myNbFile)
+             onClicked: backend.importEvtFile(myNbFile, myDomaine)
          }
     }
 
