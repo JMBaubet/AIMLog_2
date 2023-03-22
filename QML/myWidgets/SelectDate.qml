@@ -412,13 +412,13 @@ Rectangle {
                 noDate.visible = false
                 firstDate = dates[0]
                 lastDate = dates[1]
-                console.log(lastDate)
+                //console.log(lastDate)
                 month_grid.month = dates[1].getMonth()
                 month_grid.year = dates[1].getFullYear()
                 monthYear.text = dates[1].toLocaleDateString(Qt.locale("fr-FR"),"MMMM yyyy")
             }
             else {
-                console.log("Date Invalide")
+                //console.log("Date Invalide")
                 choixMois.visible = false
                 corner.visible = false
                 week_col.visible = false

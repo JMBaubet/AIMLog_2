@@ -97,7 +97,8 @@ def queryCreateTable(mydb, domaine):
         print("Qquery.exec() - Error!")
         print("Database Error: {}".format(query.lastError().databaseText()))
     else:
-        print("Création de la table evenements, dans {}.".format(mydb.databaseName()))
+        pass
+        # print("Création de la table evenements, dans {}.".format(mydb.databaseName()))
 
     # TODO : Il faudrait retourner les comptes rendu à l'ihm
 

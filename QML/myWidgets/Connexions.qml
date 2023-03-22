@@ -224,6 +224,7 @@ Rectangle {
                              dateCurseur = new Date(dateCurseur.getTime() + (mouse.x -900) * 1000);
                              backend.moveCurseur(mouse.x, dateEvent)
         }
+    }
 
 
 
