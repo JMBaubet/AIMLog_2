@@ -54,7 +54,7 @@ class Backend(QObject):
     setListPositions = Signal(list)  # pages/pgAnalyse.qml
     setSelectedPosition = Signal()  # pages/pgAnalyse.qml
     setDates = Signal(list)  # QML/myWidgets/SelectDate
-    setData = Signal(list, str, QDateTime, QDateTime)  # QML/MyWidgets/Connexions.qml
+    setData = Signal(list, str, QDateTime, QDateTime, QDateTime)  # QML/MyWidgets/Connexions.qml
     setHeureSelect = Signal(QDateTime, str)  # main.qml
 
     #    setNoWorkingDir = Signal() # main.qml, QML/pages/preference.qml
@@ -290,7 +290,7 @@ class Backend(QObject):
         listCnx, listEvt = lanceAnalyse(settings, mydb, myDate, position)
         dateDebut = myDate.addSecs(-900)
         dateFin = myDate.addSecs(299)
-        self.setData.emit(listCnx, position, dateDebut, dateFin)
+        self.setData.emit(listCnx, position, myDate, dateDebut, dateFin)
         # self.setData.emit(listCnx, listEvt)
 
     @Slot(int, QDateTime)

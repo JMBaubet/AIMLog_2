@@ -111,45 +111,6 @@ Rectangle {
                 backend.heureSelected(heure, minute)
             }
         }
-/*
-        Rectangle {
-            id: heureAffiche
-            anchors.horizontalCenter: parent.horizontalCenter
-            height: 40
-            width: heureLabel.width + centerHeure.width + minuteLabel.width + 20
-            color: Material.color(couleur, Material.ShadeA500)
-            anchors.top: parent.top
-            anchors.topMargin: 5
-            border.color: Material.color(couleur, Material.ShadeA500)
-
-            Label {
-                id: heureLabel
-                text : heure.toString().padStart(2, '0')
-                anchors.left: parent.left
-                anchors.leftMargin: 10
-                anchors.verticalCenter: parent.verticalCenter
-                font.pointSize: 32
-                horizontalAlignment: "AlignRight"
-            }
-            Label {
-                id: centerHeure
-                anchors.left: heureLabel.right
-                anchors.verticalCenter: parent.verticalCenter
-                text : "h"
-                font.pointSize: 32
-                horizontalAlignment: "AlignHCenter"
-            }
-            Label {
-                id: minuteLabel
-                anchors.left: centerHeure.right
-                anchors.verticalCenter: parent.verticalCenter
-                text : minute.toString().padStart(2, '0')
-                font.pointSize: 32
-                horizontalAlignment: "AlignLeft"
-            }
-
-        }
-*/
 
         Button {
             id: upMinutes

@@ -24,7 +24,7 @@ Frame {
         anchors.top: parent.top
         anchors.leftMargin: 0
         anchors.topMargin: 0
-        color: Material.color(couleur, Material.ShadeA500)
+        color: Material.color(couleur, Material.Shade500)
 
         Label {
             id: labelchoixDomaine

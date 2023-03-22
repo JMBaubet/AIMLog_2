@@ -15,8 +15,8 @@ Rectangle {
     property int heure : 6
     property int minute: 30
     property date gridDate: new Date()
-    property date firstDate: new Date(2022, 11, 8) // Attention le mis vaut 0 pour janvier.. 11 pour décembre
-    property date lastDate: new Date(2023, 01, 25)
+    property date firstDate: new Date(0, 0, 0) // Attention le mois vaut 0 pour janvier.. 11 pour décembre
+    property date lastDate: new Date(0, 0, 0)
 
 /*
     function dateIsready(firstDate, lastDate, reference, jour)
@@ -375,6 +375,22 @@ Rectangle {
 
     }
 
+    Rectangle {
+        id: noDate
+        color: Material.backgroundColor
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        height: noDateText.height + 10
+
+        Label {
+            id: noDateText
+            horizontalAlignment: "AlignHCenter"
+            text: "Il n'est pas possible de sélectionner une date car aucun\nenregistrement n'a été trouvé dans la base de données.\nVous devez y importer des fichiers de logs."
+        }
+    }
+
+
     Connections{
         target: backend
 
@@ -387,10 +403,30 @@ Rectangle {
         }
 
         function onSetDates(dates) {
-            //console.log("first-date recoit : " + dates[0])
-            //console.log("last-date recoit : " + dates[1])
-            firstDate = dates[0]
-            lastDate = dates[1]
+            if (dates.length > 1) {
+                choixMois.visible = true
+                corner.visible = true
+                week_col.visible = true
+                week_row.visible = true
+                month_grid.visible = true
+                noDate.visible = false
+                firstDate = dates[0]
+                lastDate = dates[1]
+                console.log(lastDate)
+                month_grid.month = dates[1].getMonth()
+                month_grid.year = dates[1].getFullYear()
+                monthYear.text = dates[1].toLocaleDateString(Qt.locale("fr-FR"),"MMMM yyyy")
+            }
+            else {
+                console.log("Date Invalide")
+                choixMois.visible = false
+                corner.visible = false
+                week_col.visible = false
+                week_row.visible = false
+                month_grid.visible = false
+                noDate.visible = true
+            }
+
         }
     }
 

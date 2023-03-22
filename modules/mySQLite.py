@@ -196,7 +196,7 @@ def createQueryForListe(donnees, table):
 
     query = query[: -1]
     query += ")"
-    print("Query <{}> ".format(query))
+    # print("Query <{}> ".format(query))
     return query
 
 
@@ -265,7 +265,8 @@ def queryGetDates(mydb, domaine):
     Returns
     -------
     dates :
-        La liste qui contient la date la plus ancienne et ladate la plus récente.
+        si aucun enregistrement de trouvé une liste vide,
+        sinon, la liste qui contient la date la plus récente et la date la plus ancienne.
     """
 
     query = QSqlQuery()
@@ -307,12 +308,13 @@ def queryGetDates(mydb, domaine):
             # print("date_time_evenements is Null ? : <{}>".format(date_time_evenements.isNull()) )
         query.finish()
 
-    if date_time_evenements.isNull() : # Si la table evenements est vide on ne reste pas bloqué
-        dates.append(date_time_connexions)
-    elif  (date_time_connexions < date_time_evenements) :
-        dates.append(date_time_connexions)
-    else:
-        dates.append(date_time_evenements)
+    if not date_time_connexions.isNull() : # si aucune date est trouvée on renvoie une liste vide
+        if date_time_evenements.isNull() : # Si la table evenements est vide on ne reste pas bloqué
+            dates.append(date_time_connexions)
+        elif  (date_time_connexions < date_time_evenements) :
+            dates.append(date_time_connexions)
+        else:
+            dates.append(date_time_evenements)
 
     #########################################`
     # SELECTION de la plus grande date
@@ -343,12 +345,13 @@ def queryGetDates(mydb, domaine):
             date_time_evenements = QDateTime.fromString(query.value(0),"yyyy-MM-dd hh:mm:ss")
         query.finish()
 
-    if date_time_evenements.isNull() : # Si la table evenements est vide on ne reste pas bloqué
-        dates.append(date_time_connexions)
-    elif  (date_time_connexions < date_time_evenements) :
-        dates.append(date_time_connexions)
-    else:
-        dates.append(date_time_evenements)
+    if not date_time_connexions.isNull() :
+        if date_time_evenements.isNull() : # Si la table evenements est vide on ne reste pas bloqué
+            dates.append(date_time_connexions)
+        elif  (date_time_connexions < date_time_evenements) :
+            dates.append(date_time_connexions)
+        else:
+            dates.append(date_time_evenements)
 
     return(dates)
 
@@ -399,7 +402,6 @@ def queryAnalyseCnx(mydb, domaine, date, position):
         print("Database Error: {}".format(query.lastError().databaseText()))
     else:
         while query.next():
-            # print("On ajoute <{}> à la liste des connexions.".format(query.value(0)))
             cnx.append(query.value("start_time"))
             cnx.append(query.value("end_time"))
             cnx.append(query.value("channel"))
@@ -416,7 +418,7 @@ def queryAnalyseEvt(mydb, domaine, date):
     query = QSqlQuery()
     dir = QStandardPaths.writableLocation(QStandardPaths.AppLocalDataLocation)
     listEvt = []
-    evt = {}
+    evt = []
     # On se connecte à la base de donnée du domaine
     mydb.setDatabaseName(dir + "/" + domaine + ".sqlite")
     if not mydb.open():
@@ -435,15 +437,14 @@ def queryAnalyseEvt(mydb, domaine, date):
         print("Database Error: {}".format(query.lastError().databaseText()))
     else:
         while query.next():
-            # print("On ajoute <{}> à la liste des connexions.".format(query.value(0)))
-            evt["datetime"] =  query.value("datetime")
-            evt["event"] =  query.value("event")
-            evt["detail"] =  query.value("detail")
-            evt["receiver"] =  query.value("receiver")
-            evt["transmiter"] =  query.value("transmiter")
-            evt["user"] =  query.value("user")
-            evt["channel"] =  query.value("channel")
-            evt["ip_adress"] =  query.value("ip_adress")
+            evt.append(query.value("datetime"))
+            evt.append(query.value("event"))
+            evt.append(query.value("detail"))
+            evt.append(query.value("receiver"))
+            evt.append(query.value("transmiter"))
+            evt.append(query.value("user"))
+            evt.append(query.value("channel"))
+            evt.append(query.value("ip_adress"))
             # print(evt)
             listEvt.append(evt)
         query.finish()

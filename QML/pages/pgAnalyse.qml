@@ -45,7 +45,6 @@ Rectangle {
         anchors.right: parent.right
 
         height: 60
-        //color: Material.color(couleur, Material.ShadeA500)
 
 
         Label {
@@ -126,7 +125,7 @@ Rectangle {
             anchors.leftMargin: 20
             anchors.verticalCenter: parent.verticalCenter
             font.pointSize: 16
-            text: "Heure :"
+            text: "Heure UTC :"
         }
 
         Label {

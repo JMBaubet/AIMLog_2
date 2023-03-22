@@ -16,10 +16,12 @@ Rectangle {
     property int mode: Material.Dark
 
     property date dateEvent: "2022-10-19 09:25:00"
+    property date dateCurseur: new Date()
     property var cnxModel: []
 
     property string position: ""
     property int curseur: 900
+    property int marqueur: 900
     property int moveDate: 0
 
     Material.theme: mode
@@ -113,47 +115,6 @@ Rectangle {
         }
     }
 
-    /*
-    Rectangle {
-        anchors.bottom: parent.bottom
-        anchors.top: listUser.bottom
-        anchors.right : parent.right
-        anchors.left: parent.left
-
-        color:"transparent"
-        Canvas {
-            id: canvastimeLine
-            anchors.fill: parent
-            anchors.leftMargin: 130
-            anchors.topMargin: 2
-
-            onPaint: {
-                var ctx = getContext("2d")
-
-                ctx.reset()
-                ctx.strokeStyle = Material.color(Material.Grey, Material.ShadeA500)
-
-                ctx.beginPath()
-                ctx.lineWidth= 2
-                ctx.moveTo(0, 4)
-                ctx.lineTo(0, 1)
-                ctx.lineTo(1200, 1)
-                ctx.lineTo(1200, 4)
-                ctx.moveTo(300, 4)
-                ctx.lineTo(300, 1)
-                ctx.moveTo(600, 4)
-                ctx.lineTo(600, 1)
-                ctx.moveTo(900, 4)
-                ctx.lineTo(900, 1)
-
-                ctx.stroke()
-
-            }
-
-        }
-
-    }
-    */
 
 
     Canvas {
@@ -166,14 +127,18 @@ Rectangle {
             var ctx = getContext("2d")
 
             ctx.reset()
-            ctx.strokeStyle = Material.color(couleur, Material.ShadeA500)
+            ctx.strokeStyle = Material.color(couleur, Material.Shade500)
+            ctx.beginPath()
+            ctx.lineWidth= 1
+            ctx.moveTo(itemCnx.marqueur, 0)
+            ctx.lineTo(itemCnx.marqueur, listUser.height)
+            ctx.stroke()
+
+            ctx.strokeStyle = Material.color(Material.BlueGrey, Material.Shade400)
 
             ctx.beginPath()
-            ctx.lineWidth= 2
-            ctx.setLineDash([4,2])
             ctx.moveTo(itemCnx.curseur, 0)
             ctx.lineTo(itemCnx.curseur, listUser.height)
-
             ctx.stroke()
 
         }
@@ -191,9 +156,10 @@ Rectangle {
         anchors.bottomMargin: 2
         anchors.left: parent.left
         anchors.leftMargin: 900 + 130 - 5 - zoneHeure.width / 2
-        color: Material.color(couleur, Material.ShadeA500)
+        color: Material.color(Material.BlueGrey, Material.Shade400)
         width: zoneHeure.width  + 10
         height: zoneHeure.height + 8
+        visible: false
         Text {
             id: heureLabel
             text: zoneHeure.text
@@ -203,11 +169,34 @@ Rectangle {
         }
     }
 
+
     TextMetrics {
         id: zoneHeure
         text: dateEvent.toLocaleTimeString(Qt.locale("fr_FR"), "hh:mm:ss")
     }
 
+
+    Rectangle {
+        id: afficheMarqueur
+        anchors.top: titre.bottom // ne pas mettre fenetrePrincipale
+        anchors.topMargin: 10
+        anchors.left: parent.left
+        anchors.leftMargin: 900 + 130 - 5 - zoneMarqueur.width / 2
+        color: Material.color(couleur, Material.Shade500)
+        width: zoneMarqueur.width  + 10
+        height: zoneMarqueur.height + 8
+        Text {
+            id: heureMarqueur
+            text: zoneMarqueur.text
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.horizontalCenter: parent.horizontalCenter
+            color: Material.foreground
+        }
+    }
+    TextMetrics {
+        id: zoneMarqueur
+        text: dateEvent.toLocaleTimeString(Qt.locale("fr_FR"), "hh:mm:ss")
+    }
 
     MouseArea {
         id: mouse
@@ -228,19 +217,14 @@ Rectangle {
                                                     mouse.x - 5 - zoneHeure.width /2 + 130
         }
 
-        onDoubleClicked: itemCnx.visible = false
-        onPressed: (mouse)=> {
-                            moveDate = Math.round(mouse.x)
-                            console.log(moveDate)
-                        }
-        onReleased: (mouse)=> {
-                    var delta =  Math.round(mouse.x) - moveDate
-                    console.log(delta)
+        onClicked: (mouse) =>{
+                             //console.log("set marqueur")
+                             backend.analyse(dateCurseur, comboBoxPosition.currentText)
+                             dateEvent = dateCurseur
+                             dateCurseur = new Date(dateCurseur.getTime() + (mouse.x -900) * 1000);
+                             backend.moveCurseur(mouse.x, dateEvent)
+        }
 
-                    backend.changeDateRef(Math.round(mouse.x) - moveDate, dateEvent, position)
-
-                    }
-    }
 
 
     Connections{
@@ -256,13 +240,13 @@ Rectangle {
         }
 
 
-
         function onSetHeureSelect(date, heure) {
-//            dateCurseur = date
+            dateCurseur = date
             zoneHeure.text = heure
+            afficheHeure.visible = true
         }
 
-        function onSetData(listCnx, position, dateDebut, dateFin) {
+        function onSetData(listCnx, position, date, dateDebut, dateFin) {
  /*           for (var i=0; i< listCnx.length; i++) {
                 console.log(dico[i].length)
                 for (var j=0; j<listCnx[i].length; j++) {
@@ -272,17 +256,21 @@ Rectangle {
             }
             console.log("Connexions.qml : position", position)
             */
+
+            afficheHeure.visible = false
             userRepeater.model = splitUser(listCnx, position)
             itemCnx.visible = true
+            dateEvent = date
 
             if (typeof userRepeater.model !== "undefined") {
-                afficheHeure.visible = true
+                //afficheHeure.visible = true
+                afficheMarqueur.visible = true
                 if ((dateDebut.toLocaleString(Qt.locale("fr_FR"), "dd")) === (dateFin.toLocaleString(Qt.locale("fr_FR"), "dd")) ) {
                     titreMextrics.text = "Chronogramme des connexions de " +
                             position + ", du " +
                             dateDebut.toLocaleString(Qt.locale("fr_FR"), "ddd dd MMM yyyy ") + "de " +
                             dateDebut.toLocaleString(Qt.locale("fr_FR"), " hh:mm:ss") + " à " +
-                            dateFin.toLocaleTimeString(Qt.locale("fr_FR"), "hh:mm:ss.")
+                            dateFin.toLocaleTimeString(Qt.locale("fr_FR"), "hh:mm:ss UTC.")
                 }
                 else {
                     titreMextrics.text = "Chronogramme des connexions de " +
@@ -290,17 +278,18 @@ Rectangle {
                             dateDebut.toLocaleString(Qt.locale("fr_FR"), "ddd dd MMM yyyy ") +
                             dateDebut.toLocaleString(Qt.locale("fr_FR"), " hh:mm:ss") + " au " +
                             dateFin.toLocaleString(Qt.locale("fr_FR"), "ddd dd MMM yyyy ") +
-                            dateFin.toLocaleTimeString(Qt.locale("fr_FR"), "hh:mm:ss.")
+                            dateFin.toLocaleTimeString(Qt.locale("fr_FR"), "hh:mm:ss UTC.")
                 }
             }
             else {
                 afficheHeure.visible = false
+                afficheMarqueur.visible = false
                 if ((dateDebut.toLocaleString(Qt.locale("fr_FR"), "dd")) === (dateFin.toLocaleString(Qt.locale("fr_FR"), "dd")) ) {
                     titreMextrics.text =  "Il n'y a pas  de connexion pour le receiver " +
                             position + ", sur la période du  " +
                             dateDebut.toLocaleString(Qt.locale("fr_FR"), "ddd dd MMM yyyy ") + "de " +
                             dateDebut.toLocaleString(Qt.locale("fr_FR"), " hh:mm:ss") + " à " +
-                            dateFin.toLocaleTimeString(Qt.locale("fr_FR"), "hh:mm:ss.")
+                            dateFin.toLocaleTimeString(Qt.locale("fr_FR"), "hh:mm:ss UTC.")
                 }
                 else {
                     titreMextrics.text =  "Il n'y a pas  de connexion pour le receiver " +
@@ -308,7 +297,7 @@ Rectangle {
                             dateDebut.toLocaleString(Qt.locale("fr_FR"), "ddd dd MMM yyyy ") +
                             dateDebut.toLocaleString(Qt.locale("fr_FR"), " hh:mm:ss") + " au " +
                             dateFin.toLocaleString(Qt.locale("fr_FR"), "ddd dd MMM yyyy ") +
-                            dateFin.toLocaleTimeString(Qt.locale("fr_FR"), "hh:mm:ss.")
+                            dateFin.toLocaleTimeString(Qt.locale("fr_FR"), "hh:mm:ss NTC.")
 
                 }
             }

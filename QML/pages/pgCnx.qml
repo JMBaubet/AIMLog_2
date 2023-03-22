@@ -52,7 +52,7 @@ Rectangle {
             anchors.right: parent.right
             anchors.top: parent.top
             height: 26
-            color: Material.color(couleur, Material.ShadeA500)
+            color: Material.color(couleur, Material.Shade500)
 
             Label {
                 id: label1

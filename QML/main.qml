@@ -33,7 +33,7 @@ Window {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
-        color: Material.color(couleur, Material.ShadeA500)
+        color: Material.color(couleur, Material.Shade500)
 
         Row {
             id: row
@@ -122,7 +122,7 @@ Window {
         width: 70 //240
         anchors.top: topBar.bottom
         anchors.bottom: parent.bottom
-        color: Material.color(couleur, Material.ShadeA500)
+        color: Material.color(couleur, Material.Shade500)
         clip: true // si pas positionné la souris est active sur 240 pixels de large
 
         PropertyAnimation{
