@@ -7,6 +7,7 @@ from modules.mySQLite import queryCreateTable, queryInsertRecords, \
 import zipfile
 import csv
 from datetime import datetime
+import platform
 
 
 def checkSetting(backend, settings, mydb):
@@ -45,10 +46,17 @@ def checkSetting(backend, settings, mydb):
     # On vérifie si le dossier de travail FileExists
     # S'il n'existe pas c'est probablement le premier lancement de l'application, alors on crée le domaine sandBox
     # et on initialise la liste des domaines, le mode par défaut.
-    if not (os.path.isdir(working_dir)):
-        os.makedirs(working_dir)
+    # Pour être compatible MACOS et Windows il faut changer l'algorithme
+    # Sous Windows le dossier worki,g_dir est créé automatiquement...
+    # On teste dans les settings Si la liste des domaine existe.
+    """
+    if (platform.system() == "Darwin"):
+        if not (os.path.isdir(working_dir)):
+            os.makedirs(working_dir)
+    """
+    domaines = settings.value("Domaines")
+    if (domaines is None):
         createDomaine(backend, settings, mydb, "sandBox")
-        # Ajout le 07 mars 2023
         settings.setValue("DomaineActif", "sandBox")
         settings.setValue("Mode", 0)
 
