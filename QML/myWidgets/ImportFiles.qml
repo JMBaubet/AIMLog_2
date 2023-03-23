@@ -21,7 +21,6 @@ Flickable {
         anchors.leftMargin: 10
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        //anchors.bottomMargin: 5
         clip: true
 
 

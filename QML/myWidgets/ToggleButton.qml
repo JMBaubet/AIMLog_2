@@ -15,7 +15,6 @@ Button {
                                        "qrc:/icons/dark/menu.svg"
                                    }
 
-
     implicitHeight: 60
     implicitWidth: 70
     topInset: 0
