@@ -43,11 +43,17 @@ Rectangle {
         //console.log("User.qml : dict", dict, "longueur : ", dict.length)
 
         var newModel = []
+        var warningHeureFin = false
         const ref = new Date(dateRef)
         for (var i = 0; i <dict.length; i++)  {     // voir : https://www.youtube.com/watch?v=x2pidX7xRlw
             //console.log(dict[i].start_time)
             const dateDebut = new Date(dict[i].start_time)
             const dateFin = new Date(dict[i].end_time)
+            //if (dateFin >= new Date (2099, 12, 01)) {
+            if (dateFin >= new Date ('2099-12-31 23:59:59')) {
+                warningHeureFin = true
+            }
+
             var diffDebut = 900 - ((ref - dateDebut) / 1000)
             if (diffDebut < 0) diffDebut = 0
             var diffFin = 900 - ((ref - dateFin) / 1000)
@@ -57,7 +63,8 @@ Rectangle {
             newModel.push({                             // voir : https://stackoverflow.com/questions/7196212/how-to-create-dictionary-and-add-key-value-pairs-dynamically-in-javascript
                           start_time: diffDebut,
                           end_time: diffFin,
-                          channel: dict[i].channel
+                          channel: dict[i].channel,
+                          warning: warningHeureFin
                           })
 
         }
@@ -116,9 +123,9 @@ Rectangle {
                         height: 25
                         horizontalAlignment: Text.AlignRight
                         verticalAlignment: Text.AlignVCenter
+                        opacity: modelData.warning ? 0.2 : 1
 
                     }
-
                     Item {
                         Rectangle {
                             width: modelData.end_time - modelData.start_time
@@ -130,6 +137,15 @@ Rectangle {
                                        modelData.channel.substring(0, 4) === "BDS0" ?
                                            Material.color(Material.Yellow, Material.Shade400) :
                                            Material.color(Material.Red, Material.Shade400) // Il faudra traiter ODS
+                            Rectangle{
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                height: 11
+                                anchors.verticalCenter: parent.verticalCenter
+                                color:  userItem.color
+                                visible: modelData.warning
+
+                            }
 
                         }
                     }

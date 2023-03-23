@@ -53,6 +53,7 @@ class Backend(QObject):
     setHeure = Signal(int, int)
     setListPositions = Signal(list)  # pages/pgAnalyse.qml
     setSelectedPosition = Signal()  # pages/pgAnalyse.qml
+    resetDataAnalyse = Signal() # pages/pgAnalyse.qml
     setDates = Signal(list)  # QML/myWidgets/SelectDate
     setData = Signal(list, str, QDateTime, QDateTime, QDateTime)  # QML/MyWidgets/Connexions.qml
     setHeureSelect = Signal(QDateTime, str)  # main.qml
@@ -96,13 +97,16 @@ class Backend(QObject):
 
     @Slot(str)
     def newDomaine(self, name):
-        print("creation du domaine : {}".format(name))
-        createDomaine(backendWindow, settings, mydb, name)
-        # TODO
-        # Il faut mettre un message dans le bottom
+        # print("creation du domaine : {}".format(name))
+        if (createDomaine(backendWindow, settings, mydb, name) == 0) :
+            self.setMsg.emit("Le domaine {} a été créé.".format(name), 1)
+        else:
+            self.setMsg.emit("Le domaine {} éxiste déjà.".format(name), 2)
+
 
     @Slot(str)
     def preselectDomaine(self, name):
+        # print("nom du domaine : <{}>".format(name))
         if settings.value("DomaineActif") == name:
             bouton_valide = False
         else:
@@ -118,20 +122,26 @@ class Backend(QObject):
         settings.setValue("DomaineActif", domaine)
         self.changeDomaine.emit(False)
         self.setDomaine.emit(domaine)
+
+        settings.beginGroup(domaine)
+        color = settings.value("Couleur")
+        settings.endGroup()
+        # print("Couleur lue pour le domaine {} : <{}>".format(domaine, color))
+        self.setColor.emit(color)
+
+
         # On met à jour les champs dates et la liste des positions dans pgPref.qml
         self.setListPositions.emit(queryListPosition(mydb, domaine))
         self.setDates.emit(queryGetDates(mydb, domaine))
-        """
-        // TODO : mettre à jour les durées de retention dans ChoixDomaine.qml
-        Reinitiaiser la pgAnalyse (Date selectionnee, heure selectionnee, et cacher le schema en cours
-        """
+
+        # Reinitialisation de la pgAnalyse (Date selectionnee, heure selectionnee, et masque du schema en cours)
+        self.resetDataAnalyse.emit()
 
     @Slot(str)
     def delDomaine(self, name):
-        print("suppression du domaine : {}".format(name))
+        # print("suppression du domaine : {}".format(name))
         removeDomaine(backendWindow, settings, mydb, name)
-        # TODO
-        # Il faut mettre un message dans le bottom
+        self.setMsg.emit("le domaine {} a été suppirmé.".format(name), 1)
 
     @Slot(str, int, str, int, str, int, str)
     def checkRetention(self, domaine, bddDuree, bddUnite, cnxDuree, cnXUnite, evtDuree, evtUnite):
@@ -144,7 +154,12 @@ class Backend(QObject):
 
     @Slot(int)
     def selectionColor(self, color):
+        # Lecture du domaine actif
+        domaine = settings.value("DomaineActif")
+        settings.beginGroup(domaine)
         settings.setValue("Couleur", color)
+        settings.endGroup()
+        # print("On enregistre la couleur <{}> pour le domaine {}.".format(color, domaine))
         self.setColor.emit(color)
 
     @Slot(str, bool)
@@ -169,7 +184,7 @@ class Backend(QObject):
 
     @Slot(int)
     def delCnxFile(self, nbFile):
-        erreur = 0
+        erreur = 1
         message = ""
         # print("delCnxFile : nbFichier : <{}>".format(nbFile))
         # print("list des fichiers : <{}>".format(self.file_connexion))
@@ -183,6 +198,7 @@ class Backend(QObject):
                 # print("on traite  {} de la liste des fichiers sélectionnés".format(fichier))
                 erreur, message = supprimeFile(fichier)
                 if not erreur:
+                    erreur = 1
                     if len(self.file_connexion) > 1:
                         message = "les fichiers ont été supprimés."
                     else:
@@ -207,6 +223,7 @@ class Backend(QObject):
                 # print("on traite  {} de la liste des fichiers sélectionnés".format(fichier))
                 erreur, message = supprimeFile(fichier)
                 if not erreur:
+                    erreur = 1
                     if len(self.file_event) > 1:
                         message = "les fichiers ont été supprimés."
                     else:

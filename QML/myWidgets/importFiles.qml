@@ -82,7 +82,7 @@ Flickable {
         }
 
         function onResetSelection() {
-            console.log("On déselectionne les checkBoxes")
+            //console.log("On déselectionne les checkBoxes")
             repeater.model = [] // Ca marche mais je n'explique pas comment
         }
 

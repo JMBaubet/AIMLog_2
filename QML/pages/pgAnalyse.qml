@@ -305,6 +305,14 @@ Rectangle {
 
         }
 
+        function onResetDataAnalyse(){
+            textFieldDate.text = qsTr("selectionez une date")
+            textFieldHeure.text = qsTr("--:--")
+            selectHeure.setMidi()
+
+            schemaCnx.visible = false
+        }
+
     }
 
 

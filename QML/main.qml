@@ -12,7 +12,7 @@ import "myWidgets"
 Window {
     id: window
 
-    property int couleur: Material.Indigo
+    property int couleur: Material.Grey
     property int mode: Material.Light
 
     Material.theme: mode

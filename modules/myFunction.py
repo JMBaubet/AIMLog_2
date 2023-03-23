@@ -43,19 +43,20 @@ def checkSetting(backend, settings, mydb):
     working_dir = QStandardPaths.writableLocation(QStandardPaths.AppLocalDataLocation)
 
     # On vérifie si le dossier de travail FileExists
-    # S'il n'existe pas c'est probablement le premier lancement de l'pplication, alors on crée le domaine sandBox
-    # et on initialise la liste des domaines
+    # S'il n'existe pas c'est probablement le premier lancement de l'application, alors on crée le domaine sandBox
+    # et on initialise la liste des domaines, le mode par défaut.
     if not (os.path.isdir(working_dir)):
         os.makedirs(working_dir)
-        createDomaine(backend, settings, mydb, working_dir, "sandBox")
+        createDomaine(backend, settings, mydb, "sandBox")
         # Ajout le 07 mars 2023
         settings.setValue("DomaineActif", "sandBox")
+        settings.setValue("Mode", 0)
 
     # On récupère la couleur et le mode de l'application
-    couleur = settings.value("Couleur")
-    if couleur is not None:
+    # couleur = settings.value("Couleur")
+    # if couleur is not None:
         # print("Couleur : {}".format(couleur))
-        backend.setColor.emit(couleur)
+    #     backend.setColor.emit(couleur)
     mode = settings.value("Mode")
     if mode is not None:
         # print("Mode : {}".format(mode))
@@ -77,9 +78,13 @@ def checkSetting(backend, settings, mydb):
                  "EvtUnit": settings.value("RetensionEvtUnit"),
                  "BddValue": settings.value("RetensionBddValue"),
                  "BddUnit": settings.value("RetensionBddUnit")}
+
+    color = settings.value("Couleur")
     settings.endGroup()
 
     backend.setRetention.emit(retention)
+
+    backend.setColor.emit(color)
 
     """ Lecture dans la base de données """
     # Mise à jour de la liste des getPosition
@@ -111,7 +116,8 @@ def createDomaine(backend, settings, mydb, name):
 
     Returns
     -------
-        Rien
+        0 si OK
+        1 si on détecte que le domaine est déjà existant.
 
     emet les signaux
     ----------------
@@ -119,26 +125,33 @@ def createDomaine(backend, settings, mydb, name):
     """
 
     working_dir = QStandardPaths.writableLocation(QStandardPaths.AppLocalDataLocation)
-    os.makedirs(working_dir + "/" + name + "/importCnx")
-    os.makedirs(working_dir + "/" + name + "/importEvt")
-    queryCreateTable(mydb, name)
+    try:
+        os.makedirs(working_dir + "/" + name + "/importCnx")
+        os.makedirs(working_dir + "/" + name + "/importEvt")
 
-    settings.beginGroup(name)
-    settings.setValue("RetensionCnxValue", 3)
-    settings.setValue("RetensionCnxUnit", "mois")
-    settings.setValue("RetensionEvtValue", 3)
-    settings.setValue("RetensionEvtUnit", "mois")
-    settings.setValue("RetensionBddValue", 12)
-    settings.setValue("RetensionBddUnit", "mois")
-    settings.endGroup()
+    except FileExistsError:
+        # print("Le domaine {} a déjà été créé.".format(name))
+        return 1
 
-    domaines = settings.value("Domaines")
-    if (domaines is None):
-        domaines = []
-    domaines.append(name)
-    settings.setValue("Domaines", domaines)
-    backend.setDomaines.emit(domaines)
+    else:
+        queryCreateTable(mydb, name)
 
+        settings.beginGroup(name)
+        settings.setValue("RetensionCnxValue", 3)
+        settings.setValue("RetensionCnxUnit", "mois")
+        settings.setValue("RetensionEvtValue", 3)
+        settings.setValue("RetensionEvtUnit", "mois")
+        settings.setValue("RetensionBddValue", 12)
+        settings.setValue("RetensionBddUnit", "mois")
+        settings.setValue("Couleur", 17) # Grey
+        settings.endGroup()
+        domaines = settings.value("Domaines")
+        if (domaines is None):
+            domaines = []
+        domaines.append(name)
+        settings.setValue("Domaines", domaines)
+        backend.setDomaines.emit(domaines)
+        return 0
 
 def removeDomaine(backend, settings, mydb, name):
     """ Suppression d'un domaine de travail
@@ -189,6 +202,7 @@ def removeDomaine(backend, settings, mydb, name):
     settings.remove("RetensionEvtUnit")
     settings.remove("RetensionBddValue")
     settings.remove("RetensionBddUnit")
+    settings.remove("Couleur")
     settings.endGroup()
 
 
@@ -432,12 +446,16 @@ def inmportCnxToBdd(settings, mydb, fichier):
                 message = "On a plus d'un fichier dans l'archive"
                 erreur = 3
             for file_name in file_names:
+                # on teste que l'on bien un fichier de type connexions et non pas un fichier de type event
+                if file_name[0:11] != "connection_" :
+                    message = "Le fichier zip sélectionné n'est pas de type connection !"
+                    erreur = 3
                 # print("Liste des fichiers : <{}>".format(file_name))
                 myzip.extract(file_name, QStandardPaths.writableLocation(QStandardPaths.TempLocation))
                 my_csv_file = QStandardPaths.writableLocation(QStandardPaths.TempLocation) + "/" + file_name
 
     except zipfile.BadZipFile:
-        message = "le fichier n'est pas un zip !"
+        message = "Le fichier n'est pas un zip !"
         erreur = 3
 
     if erreur != 0:
@@ -463,8 +481,8 @@ def inmportCnxToBdd(settings, mydb, fichier):
                 end_time = datetime.strptime(lines[i][2], "%Y-%m-%d %H:%M:%S")
                 end_time = lines[i][2]
             except ValueError: # La connexion est toujours en cours. La date de fin n'est pas connue. On met le 01/01/2100 pour avoir une date valide.
-                print("On met la date future..")
-                print("end_time non valide : <{}>".format(end_time))
+                # print("On met la date future..")
+                # print("end_time non valide : <{}>".format(end_time))
                 end_time = date_futur
 
             record = [connexion_id, start_time, end_time, lines[i][3], lines[i][4], lines[i][5],
@@ -494,7 +512,7 @@ def inmportCnxToBdd(settings, mydb, fichier):
         message = "1 enregistrement a été importé dans la base de données"
         level = 1
     else:
-        message = "{} enregistrements a été importés dans la base de données".format(nbOk)
+        message = "{} enregistrements ont été importés dans la base de données".format(nbOk)
         level = 1
     return level, message
 
@@ -539,6 +557,10 @@ def inmportEvtToBdd(settings, mydb, fichier):
                 message = "On a plus d'un fichier dans l'archive"
                 erreur = 3
             for file_name in file_names:
+                # on teste que l'on bien un fichier de type event et non pas un fichier de type connection
+                if file_name[0:6] != "event_" :
+                    message = "Le fichier zip sélectionné n'est pas de type event !"
+                    erreur = 3
                 # print("Liste des fichiers : <{}>".format(file_name))
                 myzip.extract(file_name, QStandardPaths.writableLocation(QStandardPaths.TempLocation))
                 my_csv_file = QStandardPaths.writableLocation(QStandardPaths.TempLocation) + "/" + file_name
@@ -588,7 +610,7 @@ def inmportEvtToBdd(settings, mydb, fichier):
         message = "1 enregistrement a été importé dans la base de données"
         level = 1
     else:
-        message = "{} enregistrements a été importés dans la base de données".format(nbOk)
+        message = "{} enregistrements ont été importés dans la base de données".format(nbOk)
         level = 1
     return level, message
 

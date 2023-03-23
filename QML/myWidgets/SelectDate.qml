@@ -325,8 +325,8 @@ Rectangle {
                      : Material.background
 */
 
-            color: model.date.toDateString()  === firstDate.toDateString() ? Material.color(couleur, Material.Shade700)
-                 : model.date.toDateString()  === lastDate.toDateString() ? Material.color(couleur, Material.Shade700)
+            color: model.date.toDateString()  === firstDate.toDateString() ? Material.color(couleur, Material.Shade100)
+                 : model.date.toDateString()  === lastDate.toDateString() ? Material.color(couleur, Material.Shade100)
                  : (model.date  > firstDate)  &&  (model.date  < lastDate) ? Material.color(couleur)  : Material.background
 
             Rectangle {

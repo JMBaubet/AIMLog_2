@@ -107,14 +107,14 @@ Rectangle {
             windowMode: windowMode
             materialColor: materialColor
         }
-
+/*
         ChoixCouleur {
             id: choixCouleur
             anchors.horizontalCenter: parent.horizontalCenter
             windowMode: windowMode
             materialColor: materialColor
         }
-
+*/
     } //Column
 
 

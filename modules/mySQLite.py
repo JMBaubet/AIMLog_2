@@ -75,7 +75,8 @@ def queryCreateTable(mydb, domaine):
         print("query.exec() - Error!")
         print("Database Error: {}".format(query.lastError().databaseText()))
     else:
-        print("Création de la table connexions, dans {}.".format(mydb.databaseName()))
+        #print("Création de la table connexions, dans {}.".format(mydb.databaseName()))
+        pass
 
 
     if not query.exec(
@@ -154,7 +155,8 @@ def queryInsertRecords(mydb, domaine, records, table):
             print("Qquery.exec() - Error!")
             print("Database Error: {}".format(query.lastError().databaseText()))
         else:
-            print("Suppression des anciennes connexions non closes")
+            # print("Suppression des anciennes connexions non closes")
+            pass
 
     for row in records:
         my_query = createQueryForListe(row, table)
@@ -163,8 +165,8 @@ def queryInsertRecords(mydb, domaine, records, table):
         else:
             nbOk += 1
 
-    print("Records OK : {}".format(nbOk))
-    print("Records KO : {}".format(nbErr))
+    # print("Records OK : {}".format(nbOk))
+    # print("Records KO : {}".format(nbErr))
     mydb.close()
     return nbOk, nbErr
 

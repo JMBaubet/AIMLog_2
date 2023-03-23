@@ -23,6 +23,12 @@ Rectangle {
     width: 240
 
 
+    function setMidi(){
+        heure = 12
+        minute = 0
+        heureSelected.text = heure.toString().padStart(2, '0') + "h" + minute.toString().padStart(2, '0')
+    }
+
     // HEURE
     Rectangle {
         id: choixHheure

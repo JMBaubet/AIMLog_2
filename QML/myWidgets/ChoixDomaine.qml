@@ -14,7 +14,7 @@ Frame {
 
     id: choixDomaine
     width: frameWidth
-    height: domaine.height + bdd.height + cnx.height + evt.height + 50
+    height: domaine.height + bdd.height + cnx.height + evt.height + 50 + choixCouleur.height
 
     Rectangle {
         id: rectanglechoixDomaine
@@ -28,7 +28,7 @@ Frame {
 
         Label {
             id: labelchoixDomaine
-            text: qsTr("Choix, suppression et paramétrage du domaine de travail")
+            text: qsTr("Sélection, suppression et paramétrage du domaine de travail")
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
             font.pixelSize: 14
@@ -187,7 +187,7 @@ Frame {
     Button {
         id: valider
         anchors.right: parent.right
-        anchors.bottom: parent.bottom
+        anchors.bottom: evt.bottom
         width: buttonWidth
         highlighted: false
         enabled: false
@@ -203,6 +203,15 @@ Frame {
 			valider.highlighted = false;
         }
 
+    }
+
+    ChoixCouleur {
+        id: choixCouleur
+        anchors.top: valider.bottom
+        anchors.topMargin: 10
+        anchors.horizontalCenter: parent.horizontalCenter
+        windowMode: windowMode
+        materialColor: materialColor
     }
 
 
