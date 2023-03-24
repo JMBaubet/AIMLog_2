@@ -1,5 +1,6 @@
 # This Python file uses the following encoding: utf-8
-import sys  # import os
+import sys
+import os
 from enum import Enum
 from pathlib import Path
 
@@ -9,6 +10,7 @@ from PySide6.QtCore import QObject, Slot, Signal
 from PySide6.QtCore import QSettings  # from PySide6.QtCore import QStandardPaths
 from PySide6.QtSql import QSqlDatabase
 from PySide6.QtCore import QDateTime
+from PySide6 import QtCore
 
 from modules.myFunction import checkSetting, createDomaine, removeDomaine, retentionChanged
 from modules.myFunction import backupRetention, loadRetention, checkConnexionFile, checkEventFile
@@ -16,6 +18,13 @@ from modules.myFunction import supprimeFile, inmportCnxToBdd, inmportEvtToBdd, l
 from modules.mySQLite import changeDatabase, queryListPosition, queryGetDates
 
 import rc_icons  # Utile pour avoir les icons dans le menu de gauche
+
+
+application_path = (
+    sys._MEIPASS
+    if getattr(sys, "frozen", False)
+    else os.path.dirname(os.path.abspath(__file__))
+)
 
 
 class Backend(QObject):
@@ -339,7 +348,14 @@ if __name__ == "__main__":
 
     # Load QML file
     qml_file = Path(__file__).resolve().parent / "qml/main.qml"
-    engine.load(qml_file)
+    # engine.load(qml_file)
+    # engine.load("qrc:/QML/main.qml")
+
+    # voir https://stackoverflow.com/questions/58035550/pyinstaller-and-qml-files
+    file = os.path.join(application_path, "QML/main.qml")
+    engine.load(QtCore.QUrl.fromLocalFile(file))
+
+
     if not engine.rootObjects():
         print("Fichier <{}> non trouvé".format("qml/main.qml"))
         sys.exit(-1)
