@@ -3,12 +3,8 @@ import QtQuick.Window
 import QtQuick.Controls
 import QtQuick.Controls.Material
 import QtCore
-//import QtQuick.Layouts
 
-//import "myWidgets"
 import "qrc:/QML/myWidgets" //voir : https://forum.qt.io/topic/137808/how-to-deploy-qml-with-pyinstaller
-
-
 
 Window {
     id: window
@@ -18,10 +14,8 @@ Window {
 
     Material.theme: mode
     Material.accent: couleur
-
     width: 1440
     height: 1050
-
     minimumWidth: 800
     minimumHeight: 640
 
@@ -424,17 +418,5 @@ Window {
             messageAnnimation.start()
 
         }
-
-       /*
-       function onSetNoWorkingDir() {
-           console.log("main.qml : signal setNoWorkingDir reçu !")
-           message.text = qsTr("Le dossier sélectionné n'est pas vide !")
-           message.opacity = 1
-           messageAnnimation.start()
-       }
-*/
     }
-
-
-
 }

@@ -254,7 +254,7 @@ Rectangle {
 
     }
 
-    Connexions {
+    SchemaCnx {
         id: schemaCnx
         couleur: materialColor
         mode: windowMode
