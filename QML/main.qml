@@ -6,7 +6,7 @@ import QtCore
 //import QtQuick.Layouts
 
 //import "myWidgets"
-import "qrc:/QML/myWidgets"
+import "qrc:/QML/myWidgets" //voir : https://forum.qt.io/topic/137808/how-to-deploy-qml-with-pyinstaller
 
 
 

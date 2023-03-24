@@ -1,0 +1,22 @@
+<RCC>
+    <qresource prefix="/">
+        <file>QML/myWidgets/AnalyseCnx.qml</file>
+        <file>QML/myWidgets/ChoixCouleur.qml</file>
+        <file>QML/myWidgets/ChoixDomaine.qml</file>
+        <file>QML/myWidgets/Connexions.qml</file>
+        <file>QML/myWidgets/ImportFiles.qml</file>
+        <file>QML/myWidgets/LeftMenuButton.qml</file>
+        <file>QML/myWidgets/MySpinBox.qml</file>
+        <file>QML/myWidgets/RetentionCalcul.qml</file>
+        <file>QML/myWidgets/SelectDate.qml</file>
+        <file>QML/myWidgets/SelectHeure.qml</file>
+        <file>QML/myWidgets/ToggleButton.qml</file>
+        <file>QML/myWidgets/User.qml</file>
+        <file>QML/pages/pgAnalyse.qml</file>
+        <file>QML/pages/pgCnx.qml</file>
+        <file>QML/pages/pgEvt.qml</file>
+        <file>QML/pages/pgInfo.qml</file>
+        <file>QML/pages/pgPref.qml</file>
+        <file>QML/main.qml</file>
+    </qresource>
+</RCC>
