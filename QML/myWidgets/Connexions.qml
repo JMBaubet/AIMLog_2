@@ -5,8 +5,9 @@ import QtQuick.Controls
 import QtQuick.Controls.Material
 import QtQuick.Dialogs
 
+//import "../mywidgets"
+import "qrc:/QML/myWidgets"
 
-import "../mywidgets"
 
 
 Rectangle {

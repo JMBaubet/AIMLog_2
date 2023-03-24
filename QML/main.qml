@@ -5,7 +5,8 @@ import QtQuick.Controls.Material
 import QtCore
 //import QtQuick.Layouts
 
-import "myWidgets"
+//import "myWidgets"
+import "qrc:/QML/myWidgets"
 
 
 

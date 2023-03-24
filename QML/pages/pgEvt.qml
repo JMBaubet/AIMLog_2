@@ -5,7 +5,8 @@ import QtQuick.Dialogs
 import QtCore
 
 
-import "../myWidgets"
+//import "../myWidgets"
+import "qrc:/QML/myWidgets"
 
 
 Rectangle {

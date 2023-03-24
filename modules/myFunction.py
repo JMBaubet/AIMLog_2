@@ -7,8 +7,6 @@ from modules.mySQLite import queryCreateTable, queryInsertRecords, \
 import zipfile
 import csv
 from datetime import datetime
-import platform
-
 
 def checkSetting(backend, settings, mydb):
     """ Vérification des prérequis

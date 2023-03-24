@@ -19,13 +19,13 @@ from modules.mySQLite import changeDatabase, queryListPosition, queryGetDates
 
 import rc_icons  # Utile pour avoir les icons dans le menu de gauche
 
-
+"""
 application_path = (
     sys._MEIPASS
     if getattr(sys, "frozen", False)
     else os.path.dirname(os.path.abspath(__file__))
 )
-
+"""
 
 class Backend(QObject):
     file_connexion = []
@@ -349,11 +349,11 @@ if __name__ == "__main__":
     # Load QML file
     qml_file = Path(__file__).resolve().parent / "qml/main.qml"
     # engine.load(qml_file)
-    # engine.load("qrc:/QML/main.qml")
+    engine.load("qrc:/QML/main.qml")
 
     # voir https://stackoverflow.com/questions/58035550/pyinstaller-and-qml-files
-    file = os.path.join(application_path, "QML/main.qml")
-    engine.load(QtCore.QUrl.fromLocalFile(file))
+    # file = os.path.join(application_path, "QML/main.qml")
+    # engine.load(QtCore.QUrl.fromLocalFile(file))
 
 
     if not engine.rootObjects():

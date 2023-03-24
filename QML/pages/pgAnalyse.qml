@@ -4,7 +4,9 @@ import QtQuick.Controls.Material
 import QtQml
 
 
-import "../myWidgets"
+//import "../myWidgets"
+import "qrc:/QML/myWidgets"
+
 
 Rectangle {
 

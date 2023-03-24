@@ -4,7 +4,8 @@ import QtQuick.Controls.Material
 import QtQuick.Dialogs
 import QtCore
 
-import "../myWidgets"
+//import "../myWidgets"
+import "qrc:/QML/myWidgets"
 
 Frame {
     property int materialColor: Material.Red

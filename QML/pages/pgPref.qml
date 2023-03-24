@@ -4,9 +4,10 @@ import QtQuick.Controls.Material
 import QtQuick.Dialogs
 import QtCore
 
-import "../myWidgets"
+//import "../myWidgets"
+import "qrc:/QML/myWidgets"
 
-import "../scripts/script.js" as MyScript
+// import "../scripts/script.js" as MyScript
 
 
 Rectangle {
