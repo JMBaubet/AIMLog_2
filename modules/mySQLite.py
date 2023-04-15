@@ -101,6 +101,25 @@ def queryCreateTable(mydb, domaine):
         pass
         # print("Création de la table evenements, dans {}.".format(mydb.databaseName()))
 
+
+    if not query.exec(
+        """
+        CREATE TABLE deviceStatus (
+            id INTEGER PRIMARY KEY  UNIQUE NOT NULL,
+            device VARCHAR(20),
+            start_time CARACTERE(20) NOT NULL,
+            end_time CARACTERE(20),
+            nombre TINYINT
+        )
+        """
+    ):
+        print("Qquery.exec() - Error!")
+        print("Database Error: {}".format(query.lastError().databaseText()))
+    else:
+        pass
+        #print("Création de la table deviceStatus, dans {}.".format(mydb.databaseName()))
+
+
     # TODO : Il faudrait retourner les comptes rendu à l'ihm
 
 
@@ -264,6 +283,8 @@ def queryGetDates(mydb, domaine):
         La référence à la base de donnée
     domaine :
         Le nom du domaine
+    receiver :
+        le nom du receiver sélectionné
 
     Returns
     -------
@@ -380,7 +401,7 @@ def queryAnalyseCnx(mydb, domaine, date, position):
     Returns
     -------
     listCnx :
-        une double liste sous la forme [[start_time, end_time, channel, user], ..., [start_time, end_time, channel, user]]
+        une double liste sous la forme [[start_time, end_time, channel, user], ..., [start_time, end_time, channel, user] ]
     """
 
     heure_debut = date.addSecs(-15 * 60)
@@ -398,10 +419,8 @@ def queryAnalyseCnx(mydb, domaine, date, position):
 
     my_query =  "SELECT start_time, end_time, channel, user FROM connexions WHERE receiver like '{}' AND ".format(position)
     my_query += "end_time >= '{}' AND start_time <= '{}' ".format(heure_debut.toString("yyyy-MM-dd hh:mm:ss"), heure_fin.toString("yyyy-MM-dd hh:mm:ss"))
-
-    # print("query : <{}>".format(my_query))
-
     if not query.exec("""{}""".format(my_query)):
+        print("query : <{}>".format(my_query))
         print("Database Error: {}".format(query.lastError().databaseText()))
     else:
         while query.next():
@@ -409,14 +428,25 @@ def queryAnalyseCnx(mydb, domaine, date, position):
             cnx.append(query.value("end_time"))
             cnx.append(query.value("channel"))
             cnx.append(query.value("user"))
+
+
             listCnx.append(cnx)
             #print("MySQLite : On ajoute : <{}> ".format(cnx))
             cnx=[]
         query.finish()
+
+    my_query = "SELECT start_time FROM connexions  WHERE receiver LIKE '{}' ORDER BY id ASC LIMIT 1".format(position)
+    if not query.exec("""{}""".format(my_query)):
+        print("query : <{}>".format(my_query))
+        print("Database Error: {}".format(query.lastError().databaseText()))
+    else:
+        while query.next():
+            firstTime = query.value("start_time")
+
     # print("MySQLite : listCnx : <{}> ".format(listCnx))
-    return listCnx
+    return listCnx, firstTime
 
-
+"""
 def queryAnalyseEvt(mydb, domaine, date):
     query = QSqlQuery()
     dir = QStandardPaths.writableLocation(QStandardPaths.AppLocalDataLocation)
@@ -436,7 +466,7 @@ def queryAnalyseEvt(mydb, domaine, date):
 
     # print("query : <{}>".format(my_query))
 
-    if not query.exec("""{}""".format(my_query)):
+    if not query.exec(""{}"".format(my_query)):
         print("Database Error: {}".format(query.lastError().databaseText()))
     else:
         while query.next():
@@ -451,15 +481,180 @@ def queryAnalyseEvt(mydb, domaine, date):
             # print(evt)
             listEvt.append(evt)
         query.finish()
-#    for element in listEvt:
-#        print("evenement : {}".format(element))
+    for element in listEvt:
+        print("evenement : {}".format(element))
     return listEvt
+"""
+
+def queryAnalyseDeviceStatus(mydb, domaine, date, device):
+    query = QSqlQuery()
+    dir = QStandardPaths.writableLocation(QStandardPaths.AppLocalDataLocation)
+    listEvt = []
+    evt = []
+    # On se connecte à la base de donnée du domaine
+    mydb.setDatabaseName(dir + "/" + domaine + ".sqlite")
+    if not mydb.open():
+        print("Database Error: {}".format(mydb.lastError().databaseText()))
+
+    heure_debut = date.addSecs(-15 * 60)
+    heure_fin = date.addSecs(5 * 60)
+
+    # end_time >= heure_debut && start_time <= heure_fin
+    my_query =  "SELECT device, start_time, end_time, nombre FROM deviceStatus WHERE device LIKE '{}' AND ".format(device)
+    my_query += "end_time >= '{}' AND start_time <= '{}' ".format(heure_debut.toString("yyyy-MM-dd hh:mm:ss"), heure_fin.toString("yyyy-MM-dd hh:mm:ss"))
+
+    # print("query : <{}>".format(my_query))
+    if not query.exec("""{}""".format(my_query)):
+        print("Database Error: {}".format(query.lastError().databaseText()))
+    else:
+        while query.next():
+            evt.append(query.value("start_time"))
+            evt.append(query.value("end_time"))
+            evt.append(query.value("nombre"))
+            listEvt.append(evt)
+            # print("MySQLite : On ajoute : <{}> ".format(evt))
+            evt=[]
+        query.finish()
+    # print("MySQLite : listCnx : <{}> ".format(listEvt))
+
+    my_query = "SELECT start_time FROM deviceStatus  WHERE device LIKE '{}' ORDER BY id ASC LIMIT 1".format(device)
+    if not query.exec("""{}""".format(my_query)):
+        print("query : <{}>".format(my_query))
+        print("Database Error: {}".format(query.lastError().databaseText()))
+    else:
+        while query.next():
+            firstTime = query.value("start_time")
+
+    return listEvt, firstTime
 
 
 
 
+def queryImportDeviceStatus(mydb, domaine):
+    query = QSqlQuery()
+    query1 = QSqlQuery()
+    dir = QStandardPaths.writableLocation(QStandardPaths.AppLocalDataLocation)
+    devices = []
+    # On se connecte à la base de donnée du domaine
+    mydb.setDatabaseName(dir + "/" + domaine + ".sqlite")
+    if not mydb.open():
+        print("Database Error: {}".format(mydb.lastError().databaseText()))
+
+    #  on dresse la liste des devices configurés
+    my_query = "SELECT DISTINCT receiver from evenements"
+    if not query.exec("""{}""".format(my_query)):
+        print("Database Error: {}".format(query.lastError().databaseText()))
+    else:
+        while query.next():
+            try:
+                int(query.value("receiver"))
+            except ValueError:
+                devices.append(query.value("receiver"))
+    my_query = "SELECT DISTINCT transmiter from evenements"
+    if not query.exec("""{}""".format(my_query)):
+        print("Database Error: {}".format(query.lastError().databaseText()))
+    else:
+        while query.next():
+            try:
+                int(query.value("transmiter"))
+            except ValueError:
+                devices.append(query.value("transmiter"))
+    # On a la liste de receiver
+    # print("devices : {}".format(devices))
+
+    # Pour chacun des devices on vérifie si il est déjà present dans la table deviceStatus sinon on le crée
+    for device in devices :
+        my_query1 = "SELECT COUNT(*) from deviceStatus WHERE (device like '{}')".format(device)
+        if not query1.exec("""{}""".format(my_query1)):
+            print("Database Error: {}".format(query1.lastError().databaseText()))
+        else:
+            while query1.next():
+                nombre  = query1.value(0)
+        if nombre == 0 :
+            nombre = 2
+            id_0 = 0
+            id_1 = 0
+
+            # print("On doit initialiser : {}".format(device))
+
+            # on traite l'event Device Status pour les receiver
+            traiteDeviceStatus("receiver", device, id_0, id_1, nombre, 0)
+
+            # on traite l'event Device Status pour les transmiter
+            traiteDeviceStatus("transmiter", device, id_0, id_1, nombre, 0)
 
 
+        # Si le end_time n'est pas connu, il faut sauvegarder les id au nombre de 2 maximum
+        id_0 = 0
+        id_1 = 0
+        my_query1 = "SELECT id from deviceStatus WHERE (device like '{}') AND end_time LIKE '2100-01-01 00:00:00'".format(device)
+        if not query1.exec("""{}""".format(my_query1)):
+            print("Database Error: {}".format(query1.lastError().databaseText()))
+        else:
+            nombre = 2
+            while query1.next():
+                id_0  = query1.value("id")
+                nombre = 1
+                while query1.next():
+                    id_1  = query1.value("id")
+                    nombre = 0
+        # On ajoute en fonction du dernier id dont le end_time est connu
+        my_query1 = "SELECT id from deviceStatus WHERE (device like '{}') AND end_time NOT LIKE '2100-01-01 00:00:00' ORDER BY id DESC LIMIT 1".format(device)
+        if not query1.exec("""{}""".format(my_query1)):
+            print("Database Error: {}".format(query1.lastError().databaseText()))
+        else:
+            query1.next()
+            id  = query1.value("id")
+
+            # print("On doit ajouter : {}".format(device))
+            traiteDeviceStatus("receiver", device, id_0, id_1, nombre, id)
+            traiteDeviceStatus("transmiter", device, id_0, id_1, nombre, id)
+
+
+def traiteDeviceStatus(type, device, id_0, id_1, nombre, id):
+    query2 = QSqlQuery()
+    query3 = QSqlQuery()
+    if (int(id) > 0) :
+        my_query2 = "SELECT id, {}, datetime, event, detail from evenements WHERE {} = '{}' AND event like 'Device status'   AND id > {} ORDER BY id".format(type, type, device, id)
+    else :
+        my_query2 = "SELECT id, {}, datetime, event, detail from evenements WHERE {} = '{}' AND event like 'Device status'  ORDER BY id".format(type, type, device)
+
+    if not query2.exec("""{}""".format(my_query2)):
+        print("Database Error: {}".format(query2.lastError().databaseText()))
+    else:
+        while query2.next():
+            evt = []
+            evt.append(query2.value("id"))
+            evt.append(query2.value("{}".format(type)))
+            evt.append(query2.value("datetime"))
+            evt.append(query2.value("event"))
+            evt.append(query2.value("detail"))
+            if evt[4]  == "offline" :
+                nombre -= 1
+                if nombre < 0 :
+                    print(" id : {} : incohérance de le fichier d'event : Plus de 2 interfaces offline. ".format(evt[0]))
+                    nombre = 0
+                else :
+                    if nombre == 0 :
+                        id_1 = int(evt[0])
+                    else:
+                        id_0 = int(evt[0])
+                    my_query3 = "INSERT INTO deviceStatus VALUES({}, '{}', '{}', '2100-01-01 00:00:00', {})".format(int(evt[0]), evt[1], evt[2], nombre)
+                    # print(my_query3)
+                    if not query3.exec("""{}""".format(my_query3)):
+                        print(my_query3)
+                        print("Database Error: {}".format(query3.lastError().databaseText()))
+
+            else  : # online
+                nombre +=1
+                if nombre > 1 :
+                    nombre = 2
+                    my_query3 = "UPDATE deviceStatus SET end_time = '{}' WHERE id == {} AND end_time LIKE '2100-01-01 00:00:00'".format(evt[2], id_0)
+                else:
+                    my_query3 = "UPDATE deviceStatus SET end_time = '{}' WHERE id == {} AND end_time LIKE '2100-01-01 00:00:00'".format(evt[2], id_1)
+                # print(my_query3)
+                if not query3.exec("""{}""".format(my_query3)):
+                    print("Database Error: {}".format(query3.lastError().databaseText()))
 
 
 

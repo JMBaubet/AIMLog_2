@@ -12,7 +12,7 @@ from PySide6.QtCore import QDateTime
 
 from modules.myFunction import checkSetting, createDomaine, removeDomaine, retentionChanged
 from modules.myFunction import backupRetention, loadRetention, checkConnexionFile, checkEventFile
-from modules.myFunction import supprimeFile, inmportCnxToBdd, inmportEvtToBdd, lanceAnalyse
+from modules.myFunction import supprimeFile, inmportCnxToBdd, inmportEvtToBdd, lanceAnalyse, getDates, checkBadFile
 from modules.mySQLite import queryListPosition, queryGetDates
 
 import rc_icons  # nécessaire pour avoir accès aux ressources
@@ -56,7 +56,7 @@ class Backend(QObject):
     setSelectedPosition = Signal()  # pages/pgAnalyse.qml
     resetDataAnalyse = Signal() # pages/pgAnalyse.qml
     setDates = Signal(list)  # QML/myWidgets/SelectDate
-    setData = Signal(list, str, QDateTime, QDateTime, QDateTime)  # QML/MyWidgets/Connexions.qml
+    setData = Signal(list, list, str, QDateTime, QDateTime, QDateTime, QDateTime)  # QML/MyWidgets/SchemaCnx.qml
     setHeureSelect = Signal(QDateTime, str)  # main.qml
 
     #    setNoWorkingDir = Signal() # main.qml, QML/pages/preference.qml
@@ -131,9 +131,10 @@ class Backend(QObject):
         self.setColor.emit(color)
 
 
-        # On met à jour les champs dates et la liste des positions dans pgPref.qml
+        # On met à jour la liste des positions dans pgPref.qml
         self.setListPositions.emit(queryListPosition(mydb, domaine))
-        self.setDates.emit(queryGetDates(mydb, domaine))
+        # Mise à jour des dates pour le selectDate
+        self.setDates.emit(getDates(mydb, settings))
 
         # Reinitialisation de la pgAnalyse (Date selectionnee, heure selectionnee, et masque du schema en cours)
         self.resetDataAnalyse.emit()
@@ -152,6 +153,9 @@ class Backend(QObject):
     @Slot(str, int, str, int, str, int, str)
     def saveRetention(self, domaine, bdd_duree, bdd_unite, cnx_duree, cnx_unite, evt_duree, evt_unite):
         backupRetention(settings, domaine, bdd_duree, bdd_unite, cnx_duree, cnx_unite, evt_duree, evt_unite)
+        # Mise à jour des dates pour le selectDate
+        self.setDates.emit(getDates(mydb, settings))
+
 
     @Slot(int)
     def selectionColor(self, color):
@@ -175,12 +179,12 @@ class Backend(QObject):
 
     @Slot(str, bool)
     def changeSelectFileEvt(self, fichier, etat):
-        print("changeSelectFileEvt : Fichier : <{}>, Etat : <{}>".format(fichier, etat))
+        # print("changeSelectFileEvt : Fichier : <{}>, Etat : <{}>".format(fichier, etat))
         if etat:
             self.file_event.append(fichier)
         else:
             self.file_event.remove(fichier)
-        print("Nombre de fichier : <{}>".format(len(self.file_event)))
+        # print("Nombre de fichier : <{}>".format(len(self.file_event)))
         self.setNbFileEvt.emit(len(self.file_event))
 
     @Slot(int)
@@ -256,7 +260,8 @@ class Backend(QObject):
         checkConnexionFile(backendWindow, settings)
         self.setNbFileCnx.emit(len(self.file_connexion))
         # On met à jour les dates sélectionnables
-        self.setDates.emit(queryGetDates(mydb, domaine))
+        # self.setDates.emit(queryGetDates(mydb, domaine))
+        self.setDates.emit(getDates(mydb, settings))
         # On met à jour la liste des positions
         self.setListPositions.emit(queryListPosition(mydb, domaine))
 
@@ -305,10 +310,10 @@ class Backend(QObject):
     def analyse(self, myDate, position):
         # print("date : {}".format(myDate.date() ))
         # print("heure : {}".format(myDate.time() ))
-        listCnx, listEvt = lanceAnalyse(settings, mydb, myDate, position)
+        listCnx, listEtatInterface, debut = lanceAnalyse(settings, mydb, myDate, position)
         dateDebut = myDate.addSecs(-900)
         dateFin = myDate.addSecs(299)
-        self.setData.emit(listCnx, position, myDate, dateDebut, dateFin)
+        self.setData.emit(listCnx, listEtatInterface, position, myDate, dateDebut, dateFin, debut)
         # self.setData.emit(listCnx, listEvt)
 
     @Slot(int, QDateTime)
@@ -317,6 +322,10 @@ class Backend(QObject):
         dateCurseur = dateEvent.addSecs(x - 900)
         # print("Heure sélectionnée : {}".format(dateCurseur.toString("HH.mm.ss") ))
         self.setHeureSelect.emit(dateCurseur, dateCurseur.toString("HH:mm:ss"))
+
+    @Slot()
+    def checkInfo(self):
+        checkBadFile(settings)
 
 
 ####################################@@

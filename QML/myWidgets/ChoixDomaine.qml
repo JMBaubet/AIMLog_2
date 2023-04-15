@@ -165,7 +165,7 @@ Frame {
         anchors.rightMargin: 20
         Label {
             id: labelEvt
-            text: qsTr("Durée de rétention des fichiers d'évnements :")
+            text: qsTr("Durée de rétention des fichiers d'évènements :")
             anchors.verticalCenter: parent.verticalCenter
             horizontalAlignment: "AlignRight"
             width: labelCnx.width
@@ -243,12 +243,12 @@ Frame {
         }
 
         function onSetRetention(retention) {
-            retentionBdd.unite = retention["BddUnit"]
             retentionBdd.duree = retention["BddValue"]
-            retentionCnx.unite = retention["CnxUnit"]
+            retentionBdd.unite = retention["BddUnit"]
             retentionCnx.duree = retention["CnxValue"]
-            retentionEvt.unite = retention["EvtUnit"]
+            retentionCnx.unite = retention["CnxUnit"]
             retentionEvt.duree = retention["EvtValue"]
+            retentionEvt.unite = retention["EvtUnit"]
             //console.log("retentionCnx.unite : " + retentionCnx.unite)
             //console.log("retentionCnx.value : " + retentionCnx.duree)
         }

@@ -3,10 +3,13 @@ import glob
 import shutil
 from PySide6.QtCore import QStandardPaths
 from modules.mySQLite import queryCreateTable, queryInsertRecords, \
-    queryListPosition, queryGetDates, queryAnalyseCnx, queryAnalyseEvt
+    queryListPosition, queryGetDates, queryAnalyseCnx, queryAnalyseDeviceStatus, queryImportDeviceStatus
 import zipfile
 import csv
 from datetime import datetime
+
+from PySide6.QtCore import QDateTime
+
 
 def checkSetting(backend, settings, mydb):
     """ Vérification des prérequis
@@ -39,7 +42,6 @@ def checkSetting(backend, settings, mydb):
         setDates(dates)                 envoie les dates de début et de fin connues dans la bdd du domaine sélectionné
     """
 
-    working_dir = QStandardPaths.writableLocation(QStandardPaths.AppLocalDataLocation)
 
     # On vérifie si le dossier de travail FileExists
     # S'il n'existe pas c'est probablement le premier lancement de l'application, alors on crée le domaine sandBox
@@ -96,8 +98,8 @@ def checkSetting(backend, settings, mydb):
     # Mise à jour de la liste des getPosition
     backend.setListPositions.emit(queryListPosition(mydb, domaine))
 
-    # Lecture des dates
-    backend.setDates.emit(queryGetDates(mydb, domaine))
+    # Mise à jour des dates pour le selectDate
+    backend.setDates.emit(getDates(mydb, settings))
 
 
 def createDomaine(backend, settings, mydb, name):
@@ -261,7 +263,7 @@ def retentionChanged(settings, domaine, bdd_duree, bdd_unite, cnx_duree, cnx_uni
 
 
 def backupRetention(settings, domaine, bdd_duree, bdd_unite, cnx_duree, cnx_unite, evt_duree, evt_unite):
-    """ Sauvegrade dans les sttings des paramètre de retention des données
+    """ Sauvegarde dans les settings des paramètre de retention des données
 
     Cette fonction enregistre dans les settings  les paramètres de retention ont été modifiés pour un domaine.
 
@@ -307,6 +309,7 @@ def loadRetention(settings, domaine):
     """
 
     settings.beginGroup(domaine)
+
     retention = {"CnxValue": settings.value("RetensionCnxValue"),
                  "CnxUnit": settings.value("RetensionCnxUnit"),
                  "EvtValue": settings.value("RetensionEvtValue"),
@@ -345,7 +348,7 @@ def checkConnexionFile(backend, settings):
     # On  liste les fichiers présents dans le répertoire
     working_dir = QStandardPaths.writableLocation(QStandardPaths.AppLocalDataLocation)
     os.chdir(working_dir + "/" + domaine + "/importCnx")
-    file = glob.glob("*.zip")
+    file = glob.glob("*.*")
     file.sort(reverse=True)
     backend.setFile.emit(file, domaine)
 
@@ -377,7 +380,7 @@ def checkEventFile(backend, settings):
     # On  liste les fichiers présents dans le répertoire
     working_dir = QStandardPaths.writableLocation(QStandardPaths.AppLocalDataLocation)
     os.chdir(working_dir + "/" + domaine + "/importEvt")
-    file = glob.glob("*.zip")
+    file = glob.glob("*.*")
     file.sort(reverse=True)
     backend.setFile.emit(file, domaine)
 
@@ -609,6 +612,10 @@ def inmportEvtToBdd(settings, mydb, fichier):
 
     nbOk, nbErr = queryInsertRecords(mydb, domaine, records, "evenements")
 
+    # Si NbOK > 0 i faut mettre a jour la table device status
+    if nbOk > 0 :
+        importDeviceStatus(mydb, domaine)
+
     if not nbOk:
         message = "Aucun enregistrement n'a été importé !"
         level = 2
@@ -635,15 +642,130 @@ def lanceAnalyse(settings, mydb, date, position):
     mydb :
         La référence à la base de donnée
     fichier :
-        Le fichier a extraire et à importer dans le base de données.
+        Le fichier a extraire et à importer dans la base de données.
 
     Returns
     -------
         listCnx : une liste qui contient les listes suivantes  [[start_time], [end-time], [channel_name], [user_name]]
+        listEtatCnx :  une liste qui contient les listes suivantes  [[start_time], [end-time], [nombre]]
         listEvt : A définir.
 
     """
     domaine = settings.value("DomaineActif")
-    listCnx = queryAnalyseCnx(mydb, domaine, date, position)
-    listEvt = queryAnalyseEvt(mydb, domaine, date)
-    return listCnx, listEvt
+    listCnx, firstTimeCnx = queryAnalyseCnx(mydb, domaine, date, position)
+    # listEvt = queryAnalyseEvt(mydb, domaine, date)
+    listEtatCnx, firstTimeDev = queryAnalyseDeviceStatus(mydb, domaine, date, position)
+
+    # print("firstTimeCnx : {}".format(firstTimeCnx))
+    # print("firstTimeDev : {}".format(firstTimeDev))
+    date_time_firstTimeCnx = QDateTime.fromString(firstTimeCnx, "yyyy-MM-dd hh:mm:ss")
+    date_time_firstTimeDev = QDateTime.fromString(firstTimeDev, "yyyy-MM-dd hh:mm:ss")
+
+    # On calcule la plus petite date pour de device
+    if (date_time_firstTimeCnx < date_time_firstTimeDev) :
+        debut = date_time_firstTimeCnx
+    else:
+        debut = date_time_firstTimeDev
+
+
+
+    return listCnx, listEtatCnx, debut
+
+
+def getDates(mydb, settings):
+    """ retourne les dates limites en fonction de la durée de rétention de la base de données
+
+    Cette fonction permet :
+        - de mettre à jour les dates séletionnables en fonction du contenu de la base de données,
+        et en fonction de la durée de rétention des données dans la base de donnée.
+
+    Parameters
+    ----------
+    mydb :
+        La référence à la base de donnée
+    settings :
+        Les paramètres de l'application qui sont enregistrés d'une session à l'autre
+
+    Returns
+    -------
+    dates :
+        si aucun enregistrement de trouvé une liste vide,
+        sinon, la liste qui contient :
+            la date la plus ancienne connues dans la BDD ou si plus récente la date limite de durée de rétention de la BDD
+            la date la plus récente connue dans ls BDD.
+    """
+
+    domaine = settings.value("DomaineActif")
+
+    settings.beginGroup(domaine)
+    retention = {"CnxValue": settings.value("RetensionCnxValue"),
+                 "CnxUnit": settings.value("RetensionCnxUnit"),
+                 "EvtValue": settings.value("RetensionEvtValue"),
+                 "EvtUnit": settings.value("RetensionEvtUnit"),
+                 "BddValue": settings.value("RetensionBddValue"),
+                 "BddUnit": settings.value("RetensionBddUnit")}
+    settings.endGroup()
+
+    # Lecture des dates sotchées dans la base de données
+    dates = queryGetDates(mydb, domaine)
+    today = QDateTime.currentDateTime()
+
+    if retention["BddUnit"] == "ans" :
+        firstDate = today.addYears( 0 - retention["BddValue"])
+    elif retention["BddUnit"] == "mois" :
+        firstDate = today.addMonths(0 - retention["BddValue"])
+    elif retention["BddUnit"] == "jours" :
+        firstDate = today.addDays(0 - retention["BddValue"])
+    if len(dates) > 0 :
+        if (firstDate > dates[0]) :
+            # print(" on limite les dates")
+            dates[0] = firstDate
+    return dates
+
+def checkBadFile(settings):
+    """ retourne un flag si des fichiers de type inconnu présents dans les dossier de transfert
+
+    Cette fonction permet :
+        - de signaler si des fichiers autre que des fichiers .zip sont présents dans les dossiers :
+            - importCnx et importEvt de tous les domaines connus
+
+    Parameters
+    ----------
+    settings :
+        Les paramètres de l'application qui sont enregistrés d'une session à l'autre
+
+    Returns
+    -------
+    badFile :
+        si au moins un fichier a été trouvé : true
+        sinon : false
+    """
+    badFile = False
+    working_dir = QStandardPaths.writableLocation(QStandardPaths.AppLocalDataLocation)
+    domaines = settings.value("Domaines")
+    if domaines is not None:
+        for domaine in domaines :
+            # On  liste les fichiers présents dans le répertoire
+            os.chdir(working_dir + "/" + domaine + "/importCnx")
+            files = glob.glob("*")
+            for file in files :
+                if file[-4:] != ".zip" :
+                    badFile = True
+                    print("myFunction.py, checkBadFile, dossier Cnx : Fichier inatendu dans le domaine {} : {}".format( domaine, file))
+                    break
+            if badFile : break
+            os.chdir(working_dir + "/" + domaine + "/importEvt")
+            files = glob.glob("*")
+            for file in files :
+                if file[-4:] != ".zip" :
+                    badFile = True
+                    print("myFunction.py, checkBadFile, dossier Evt : Fichier inatendu dans le domaine {} : {}".format( domaine, file))
+                    break
+    return badFile
+
+
+def importDeviceStatus(mydb, domaine):
+    queryImportDeviceStatus(mydb, domaine)
+
+
+

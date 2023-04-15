@@ -48,10 +48,52 @@ Rectangle {
 
         height: 60
 
+        Label {
+            id: textSite
+            anchors.left: parent.left
+            anchors.leftMargin: 20
+            //width: 50
+            anchors.verticalCenter: parent.verticalCenter
+            text: qsTr("Site :")
+        }
+
+
+        ComboBox {
+            id: comboBoxSite
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: textSite.right
+            anchors.leftMargin: 10
+            //onCurrentValueChanged: backend.selectSite(currentText)
+            model: ["Tous", "Vigie Nord", "Vigie Centrale", "Vigie Sud", "Salle IFR", "VTE et VTS", "Technique."]
+        }
+
+        Label {
+            id: textPosition
+            anchors.left: comboBoxSite.right
+            anchors.leftMargin: 20
+            //width: 50
+            anchors.verticalCenter: parent.verticalCenter
+            text: qsTr("Position :")
+        }
+
+
+        ComboBox {
+            id: comboBoxPosition
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: textPosition.right
+            anchors.leftMargin: 10
+            //onCurrentValueChanged: backend.selectSite(currentText)
+            onHighlighted: {
+                selectedPosition = true
+                backend.selectSite()
+            }
+        }
+
+
 
         Label {
             id: dateLabel
-            anchors.left: parent.left
+            anchors.left: comboBoxPosition.right
             anchors.leftMargin: 20
             anchors.verticalCenter: parent.verticalCenter
             font.pointSize: 16
@@ -190,47 +232,6 @@ Rectangle {
             mode: windowMode
             couleur: materialColor
             visible: selectHeureisVisible
-        }
-
-        Label {
-            id: textSite
-            anchors.left: heureBtn.right
-            anchors.leftMargin: 20
-            //width: 50
-            anchors.verticalCenter: parent.verticalCenter
-            text: qsTr("Site :")
-        }
-
-
-        ComboBox {
-            id: comboBoxSite
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.left: textSite.right
-            anchors.leftMargin: 10
-            //onCurrentValueChanged: backend.selectSite(currentText)
-            model: ["Tous", "Vigie Nord", "Vigie Centrale", "Vigie Sud", "Salle IFR", "Vigies Trafic E. et S.", "Autre..."]
-        }
-
-        Label {
-            id: textPosition
-            anchors.left: comboBoxSite.right
-            anchors.leftMargin: 20
-            //width: 50
-            anchors.verticalCenter: parent.verticalCenter
-            text: qsTr("Position :")
-        }
-
-
-        ComboBox {
-            id: comboBoxPosition
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.left: textPosition.right
-            anchors.leftMargin: 10
-            //onCurrentValueChanged: backend.selectSite(currentText)
-            onHighlighted: {
-                selectedPosition = true
-                backend.selectSite()
-            }
         }
 
         Button {

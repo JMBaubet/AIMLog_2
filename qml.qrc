@@ -1,9 +1,7 @@
 <RCC>
     <qresource prefix="/">
-        <file>QML/myWidgets/AnalyseCnx.qml</file>
         <file>QML/myWidgets/ChoixCouleur.qml</file>
         <file>QML/myWidgets/ChoixDomaine.qml</file>
-        <file>QML/myWidgets/Connexions.qml</file>
         <file>QML/myWidgets/ImportFiles.qml</file>
         <file>QML/myWidgets/LeftMenuButton.qml</file>
         <file>QML/myWidgets/MySpinBox.qml</file>
@@ -18,5 +16,7 @@
         <file>QML/pages/pgInfo.qml</file>
         <file>QML/pages/pgPref.qml</file>
         <file>QML/main.qml</file>
+        <file>QML/myWidgets/SchemaCnx.qml</file>
+        <file>QML/myWidgets/EtatInterfaces.qml</file>
     </qresource>
 </RCC>

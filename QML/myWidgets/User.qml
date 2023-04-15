@@ -2,6 +2,8 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Material
 
+import "qrc:/QML/myWidgets"
+
 Rectangle {
 
     property string nom: ""
@@ -136,7 +138,9 @@ Rectangle {
                                        Material.color(Material.Green, Material.Shade400) :
                                        modelData.channel.substring(0, 4) === "BDS0" ?
                                            Material.color(Material.Yellow, Material.Shade400) :
-                                           Material.color(Material.Red, Material.Shade400) // Il faudra traiter ODS
+                                           modelData.channel.substring(modelData.channel.length - 8) === "_sur_ODS" ?
+                                               Material.color(Material.LightBlue, Material.Shade400) :
+                                               Material.color(Material.Red, Material.Shade400)
                             Rectangle{
                                 anchors.left: parent.left
                                 anchors.right: parent.right
@@ -146,6 +150,7 @@ Rectangle {
                                 visible: modelData.warning
 
                             }
+
 
                         }
                     }
